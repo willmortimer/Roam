@@ -1,0 +1,51 @@
+{
+  "originHash" : "9cc3a4a2a5868d016cf832b4838927294aa534f811e8dc66aca2cbfe6708d1e3",
+  "pins" : [
+    {
+      "identity" : "libssh2-spm",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Lakr233/libssh2-spm.git",
+      "state" : {
+        "revision" : "5e066ae4460b4041258c09fba5b02d4652daa8e1",
+        "version" : "1.11.2"
+      }
+    },
+    {
+      "identity" : "openssl-spm",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Lakr233/openssl-spm.git",
+      "state" : {
+        "revision" : "d41d6bf1089a0e9dde41c6b167a3d46a15b13bcf",
+        "version" : "3.6.1"
+      }
+    },
+    {
+      "identity" : "swift-argument-parser",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-argument-parser",
+      "state" : {
+        "revision" : "626b5b7b2f45e1b0b1c6f4a309296d1d21d7311b",
+        "version" : "1.7.1"
+      }
+    },
+    {
+      "identity" : "swiftterm",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/migueldeicaza/SwiftTerm.git",
+      "state" : {
+        "revision" : "3c45fdcfcf4395c72d2a4ee23c0bce79017b5391",
+        "version" : "1.12.0"
+      }
+    },
+    {
+      "identity" : "yams",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/jpsim/Yams.git",
+      "state" : {
+        "revision" : "3d6871d5b4a5cd519adf233fbb576e0a2af71c17",
+        "version" : "5.4.0"
+      }
+    }
+  ],
+  "version" : 3
+}

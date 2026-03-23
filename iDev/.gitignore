@@ -1,0 +1,16 @@
+# macOS
+.DS_Store
+
+# Xcode user-specific state
+*.xcuserstate
+*.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+*.xcuserdatad/
+*.xccheckout
+*.moved-aside
+DerivedData/
+*.xcresult
+
+# Swift Package Manager
+**/.build/
+**/.swiftpm/

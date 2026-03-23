@@ -6,8 +6,25 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		AFE368DF2F6F4FC900A18110 /* Yams in Frameworks */ = {isa = PBXBuildFile; productRef = AFE36821BBBBBB0100000001 /* Yams */; };
+		AFE368E02F6F4FC900A18110 /* SwiftTerm in Frameworks */ = {isa = PBXBuildFile; productRef = AFE36821BBBBBB0100000002 /* SwiftTerm */; };
+		AFE368E12F6F4FC900A18110 /* iDevSSH in Frameworks */ = {isa = PBXBuildFile; productRef = AFE36821BBBBBB0100000003 /* iDevSSH */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		AFE369082F6F500000A18110 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AFE367FC2F6F451500A18110 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AFE368032F6F451500A18110;
+			remoteInfo = iDev;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		AFE368042F6F451500A18110 /* iDev.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iDev.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AFE369012F6F500000A18110 /* iDevTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = iDevTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -29,10 +46,25 @@
 			path = iDev;
 			sourceTree = "<group>";
 		};
+		AFE369022F6F500000A18110 /* iDevTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = iDevTests;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		AFE368012F6F451500A18110 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AFE368E12F6F4FC900A18110 /* iDevSSH in Frameworks */,
+				AFE368E02F6F4FC900A18110 /* SwiftTerm in Frameworks */,
+				AFE368DF2F6F4FC900A18110 /* Yams in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AFE369042F6F500000A18110 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -46,6 +78,7 @@
 			isa = PBXGroup;
 			children = (
 				AFE368062F6F451500A18110 /* iDev */,
+				AFE369022F6F500000A18110 /* iDevTests */,
 				AFE368052F6F451500A18110 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -54,6 +87,7 @@
 			isa = PBXGroup;
 			children = (
 				AFE368042F6F451500A18110 /* iDev.app */,
+				AFE369012F6F500000A18110 /* iDevTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -78,10 +112,34 @@
 			);
 			name = iDev;
 			packageProductDependencies = (
+				AFE36821BBBBBB0100000001 /* Yams */,
+				AFE36821BBBBBB0100000002 /* SwiftTerm */,
+				AFE36821BBBBBB0100000003 /* iDevSSH */,
 			);
 			productName = iDev;
 			productReference = AFE368042F6F451500A18110 /* iDev.app */;
 			productType = "com.apple.product-type.application";
+		};
+		AFE369062F6F500000A18110 /* iDevTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AFE3690B2F6F500000A18110 /* Build configuration list for PBXNativeTarget "iDevTests" */;
+			buildPhases = (
+				AFE369032F6F500000A18110 /* Sources */,
+				AFE369042F6F500000A18110 /* Frameworks */,
+				AFE369052F6F500000A18110 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				AFE369072F6F500000A18110 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				AFE369022F6F500000A18110 /* iDevTests */,
+			);
+			name = iDevTests;
+			productName = iDevTests;
+			productReference = AFE369012F6F500000A18110 /* iDevTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
 
@@ -96,6 +154,10 @@
 					AFE368032F6F451500A18110 = {
 						CreatedOnToolsVersion = 26.3;
 					};
+					AFE369062F6F500000A18110 = {
+						CreatedOnToolsVersion = 26.3;
+						TestTargetID = AFE368032F6F451500A18110;
+					};
 				};
 			};
 			buildConfigurationList = AFE367FF2F6F451500A18110 /* Build configuration list for PBXProject "iDev" */;
@@ -107,18 +169,31 @@
 			);
 			mainGroup = AFE367FB2F6F451500A18110;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				AFE36820AAAAAA0100000001 /* XCRemoteSwiftPackageReference "Yams" */,
+				AFE36820AAAAAA0100000002 /* XCRemoteSwiftPackageReference "SwiftTerm" */,
+				AFE36820AAAAAA0100000003 /* XCLocalSwiftPackageReference "Packages/iDevSSH" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = AFE368052F6F451500A18110 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
 				AFE368032F6F451500A18110 /* iDev */,
+				AFE369062F6F500000A18110 /* iDevTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		AFE368022F6F451500A18110 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AFE369052F6F500000A18110 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -135,7 +210,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		AFE369032F6F500000A18110 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		AFE369072F6F500000A18110 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = AFE368032F6F451500A18110 /* iDev */;
+			targetProxy = AFE369082F6F500000A18110 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		AFE368132F6F451600A18110 /* Debug */ = {
@@ -327,6 +417,46 @@
 			};
 			name = Release;
 		};
+		AFE369092F6F500000A18110 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = PQNKMDU3U3;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = willmortimer.iDevTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/iDev.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/iDev";
+			};
+			name = Debug;
+		};
+		AFE3690A2F6F500000A18110 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = PQNKMDU3U3;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = willmortimer.iDevTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/iDev.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/iDev";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -348,7 +478,60 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		AFE3690B2F6F500000A18110 /* Build configuration list for PBXNativeTarget "iDevTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AFE369092F6F500000A18110 /* Debug */,
+				AFE3690A2F6F500000A18110 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		AFE36820AAAAAA0100000003 /* XCLocalSwiftPackageReference "Packages/iDevSSH" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/iDevSSH;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		AFE36820AAAAAA0100000001 /* XCRemoteSwiftPackageReference "Yams" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/jpsim/Yams.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.0.0;
+			};
+		};
+		AFE36820AAAAAA0100000002 /* XCRemoteSwiftPackageReference "SwiftTerm" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/migueldeicaza/SwiftTerm.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		AFE36821BBBBBB0100000001 /* Yams */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AFE36820AAAAAA0100000001 /* XCRemoteSwiftPackageReference "Yams" */;
+			productName = Yams;
+		};
+		AFE36821BBBBBB0100000002 /* SwiftTerm */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AFE36820AAAAAA0100000002 /* XCRemoteSwiftPackageReference "SwiftTerm" */;
+			productName = SwiftTerm;
+		};
+		AFE36821BBBBBB0100000003 /* iDevSSH */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AFE36820AAAAAA0100000003 /* XCLocalSwiftPackageReference "Packages/iDevSSH" */;
+			productName = iDevSSH;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = AFE367FC2F6F451500A18110 /* Project object */;
 }

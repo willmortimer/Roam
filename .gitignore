@@ -1,0 +1,35 @@
+# macOS
+.DS_Store
+
+# Local tooling
+.claude/
+.git-backups/
+
+# Environment and local overrides
+.env
+.env.*
+!.env.example
+
+# Logs and temp output
+*.log
+*.xcresult
+tmp/
+temp/
+sync-data/
+iDev-rs/sync-data/
+
+# Rust
+iDev-rs/target/
+
+# Swift Package Manager
+**/.build/
+**/.swiftpm/
+
+# Xcode user-specific state
+*.xcuserstate
+*.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+*.xcuserdatad/
+*.xccheckout
+*.moved-aside
+DerivedData/
