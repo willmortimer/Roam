@@ -1,51 +1,45 @@
-# iDev
+# Roam
 
-iDev is a multi-component remote development workspace centered on an iOS client. This top-level directory is now the intended project root for the app, the Rust services, the shared docs, and the build commands.
+Roam is an iOS-first remote development workspace for SSH-driven workflows. It combines a native client, a Rust helper daemon, and a self-hosted sync service so you can manage hosts, workspaces, terminal sessions, previews, artifacts, and encrypted app data from one system.
 
-## Workspace Layout
+## What It Does
 
-- `iDev/`: SwiftUI + SwiftData iOS app, plus the local `iDevSSH` package.
-- `iDev-rs/`: Rust workspace containing the `idev-helper` RPC daemon and the `idev-sync-server`.
-- `docs/`: architecture notes, development setup, repository assessment, and technical plans.
-- `justfile`: common build and test commands for the full workspace.
+- Connects to remote machines over SSH with a native iOS client
+- Organizes hosts, workspaces, tmux sessions, previews, and repo-aware views
+- Uses `roam-helper` for remote RPC features such as git actions, process discovery, tunnel management, and workspace resume planning
+- Supports encrypted export/import flows and optional self-hosted sync through `roam-sync-server`
 
-## Main Components
+## Repository Layout
 
-### iOS app
+- `Roam/`: SwiftUI iOS app, tests, bundled resources, and the local `RoamSSH` package
+- `roam-rs/`: Rust workspace for `roam-helper` and `roam-sync-server`
+- `docs/`: architecture notes, setup docs, and technical plans
+- `justfile`: common local build and test commands
 
-The iOS app owns the user-facing product surface: hosts, workspaces, SSH sessions, tmux-aware views, repo/test lenses, previews, vault flows, and sync settings.
+## Requirements
 
-### Rust helper
-
-`idev-helper` is a local/remote RPC daemon that exposes operational capabilities to the app over NDJSON RPC. It currently covers:
-
-- tmux inspection and control
-- git status and write actions
-- process and preview discovery
-- artifact listing
-- workspace resume planning
-- test report parsing
-- proxy and tunnel lifecycle
-
-### Sync server
-
-`idev-sync-server` is a small Axum service that stores opaque encrypted blobs on disk and can be protected with a bearer token.
+- Xcode 17+ with an iOS 26 simulator runtime
+- Rust stable
+- `just`
+- A container runtime if you want automatic Linux helper cross-builds (`Docker Desktop`, `Colima`, or `Podman`)
 
 ## Quick Start
 
-Requirements:
+```sh
+just doctor
+just rust-build
+just ios-build
+just ios-run
+```
 
-- Xcode 17+ with an iOS 26 simulator runtime
-- Rust stable toolchain
-- `just`
-
-Common commands:
+Useful full-workspace commands:
 
 ```sh
-just rust-build
+just cross-install
+just helper-cross-all
 just rust-test-all
 just sync-build
-just ios-build
+just ios-test
 just ios-check
 just check
 ```
@@ -53,9 +47,16 @@ just check
 Useful direct Xcode commands:
 
 ```sh
-xcodebuild -project iDev/iDev.xcodeproj -scheme iDev -destination 'generic/platform=iOS Simulator' -derivedDataPath /tmp/idev-derived build
-xcodebuild test -project iDev/iDev.xcodeproj -scheme iDev -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -derivedDataPath /tmp/idev-test-derived
+xcodebuild -project Roam/Roam.xcodeproj -scheme Roam -destination 'generic/platform=iOS Simulator' -derivedDataPath /tmp/roam-derived build
+xcodebuild test -project Roam/Roam.xcodeproj -scheme Roam -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -derivedDataPath /tmp/roam-test-derived
 ```
+
+## Helper Packaging
+
+The app includes a build phase that stages Linux helper binaries into the bundle during normal Xcode builds.
+
+- If `cross` is installed, missing helper binaries can be built automatically for `x86_64-unknown-linux-musl` and `aarch64-unknown-linux-musl`
+- If `cross` is not installed, the app still builds, but helper install and upgrade flows will report the missing binaries until you build them
 
 ## Documentation
 
@@ -64,7 +65,3 @@ xcodebuild test -project iDev/iDev.xcodeproj -scheme iDev -destination 'platform
 - `docs/git-setup.md`
 - `docs/repository-state.md`
 - `docs/sprint-4.1-mosh-technical-plan.md`
-
-## Repository Note
-
-The top-level repository is the canonical repo for the full workspace. The legacy embedded iOS git directory has been retired from the working tree as part of consolidation, with backup details captured in `docs/git-setup.md`.
