@@ -1,5 +1,6 @@
 # Roam project — local build and test recipes
-# Usage: just <recipe>  (run from ~/Developer/Roam)
+# Usage: just <recipe>  (run from ~/Developer/iDev)
+# Tool versions live in mise.toml; just is the workflow/task layer.
 
 set shell := ["zsh", "-cu"]
 
@@ -20,33 +21,52 @@ default: build
 
 # ── Rust helper ──────────────────────────────────────────────────────────────
 
-# Install `cross` for Linux helper cross-compilation
+# Trust the repo's mise.toml on this machine
+tools-trust:
+    mise trust -y mise.toml
+
+# Install all repo-managed dev tools from mise.toml
+tools-install:
+    mise install
+
+# Upgrade all repo-managed dev tools via mise
+tools-upgrade:
+    mise upgrade
+
+# Install or refresh the repo-managed `cross` tool via mise
 cross-install:
-    cargo install cross --git https://github.com/cross-rs/cross
+    mise install cargo:cross
+
+# Show the active repo toolchain versions managed by mise
+rust-toolchain:
+    mise current
+    mise exec -- rustc --version
+    mise exec -- cargo --version
+    mise exec -- cross --version
 
 # Build Rust helper (debug)
 rust-build:
-    cd {{rs_dir}} && cargo build
+    cd {{rs_dir}} && mise exec -- cargo build
 
 # Build Rust helper (release)
 rust-release:
-    cd {{rs_dir}} && cargo build --release
+    cd {{rs_dir}} && mise exec -- cargo build --release
 
 # Run helper unit + integration tests
 rust-test:
-    cd {{rs_dir}} && cargo test -p roam-helper
+    cd {{rs_dir}} && mise exec -- cargo test -p roam-helper
 
 # Run Rust clippy lints
 rust-lint:
-    cd {{rs_dir}} && cargo clippy -- -D warnings
+    cd {{rs_dir}} && mise exec -- cargo clippy -- -D warnings
 
 # Cross-build for x86_64 musl (static Linux binary)
 rust-cross-x86:
-    cd {{rs_dir}} && cross build --release --target x86_64-unknown-linux-musl
+    cd {{rs_dir}} && mise exec -- cross build --release --target x86_64-unknown-linux-musl
 
 # Cross-build for aarch64 musl (static Linux binary)
 rust-cross-arm:
-    cd {{rs_dir}} && cross build --release --target aarch64-unknown-linux-musl
+    cd {{rs_dir}} && mise exec -- cross build --release --target aarch64-unknown-linux-musl
 
 # Build both Linux helper binaries used by the app installer
 helper-cross-all: rust-cross-x86 rust-cross-arm
@@ -64,15 +84,15 @@ rust-size: rust-release
 
 # Build sync server (debug)
 sync-build:
-    cd {{rs_dir}} && cargo build -p roam-sync-server
+    cd {{rs_dir}} && mise exec -- cargo build -p roam-sync-server
 
 # Build sync server (release)
 sync-release:
-    cd {{rs_dir}} && cargo build -p roam-sync-server --release
+    cd {{rs_dir}} && mise exec -- cargo build -p roam-sync-server --release
 
 # Run sync server tests (unit + integration)
 sync-test:
-    cd {{rs_dir}} && cargo test -p roam-sync-server
+    cd {{rs_dir}} && mise exec -- cargo test -p roam-sync-server
 
 # Build sync server Docker image
 sync-docker:
@@ -82,11 +102,11 @@ sync-docker:
 
 # Run all Rust tests across the workspace (helper + sync-server)
 rust-test-all:
-    cd {{rs_dir}} && cargo test --workspace
+    cd {{rs_dir}} && mise exec -- cargo test --workspace
 
 # Lint entire Rust workspace
 rust-lint-all:
-    cd {{rs_dir}} && cargo clippy --workspace -- -D warnings
+    cd {{rs_dir}} && mise exec -- cargo clippy --workspace -- -D warnings
 
 # ── iOS app ──────────────────────────────────────────────────────────────────
 
@@ -167,8 +187,12 @@ check: rust-lint-all ios-check
 # Quick local tooling status
 doctor:
     @echo "── Core tools ──"
+    @if command -v mise >/dev/null 2>&1; then echo "mise:   $(command -v mise) ($(mise --version))"; else echo "mise:   missing"; fi
     @if command -v just >/dev/null 2>&1; then echo "just:   $(command -v just)"; else echo "just:   missing"; fi
     @if command -v cargo >/dev/null 2>&1; then echo "cargo:  $(command -v cargo)"; else echo "cargo:  missing"; fi
+    @if command -v rustc >/dev/null 2>&1; then echo "rustc:  $(rustc --version)"; else echo "rustc:  missing"; fi
+    @if command -v rustup >/dev/null 2>&1; then echo "rustup: $(command -v rustup)"; else echo "rustup: missing"; fi
+    @if command -v rustup >/dev/null 2>&1; then echo "toolchain: $(rustup show active-toolchain 2>/dev/null || echo unknown)"; fi
     @if command -v cross >/dev/null 2>&1; then echo "cross:  $(command -v cross)"; else echo "cross:  missing"; fi
     @if command -v xcodebuild >/dev/null 2>&1; then echo "xcodebuild: $(command -v xcodebuild)"; else echo "xcodebuild: missing"; fi
     @if command -v xcrun >/dev/null 2>&1; then echo "xcrun:  $(command -v xcrun)"; else echo "xcrun:  missing"; fi
@@ -196,5 +220,5 @@ rpc-methods:
 # Quick NDJSON smoke test: send a ping request to the helper via stdin
 rpc-smoke:
     @echo '{"id":"test-1","method":"ping","params":{}}' \
-        | cd {{rs_dir}} && cargo run --quiet -- serve --stdio 2>/dev/null \
+        | cd {{rs_dir}} && mise exec -- cargo run --quiet -- serve --stdio 2>/dev/null \
         | head -1 | python3 -m json.tool

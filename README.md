@@ -45,13 +45,15 @@ The app is the primary user-facing surface. It manages hosts, workspaces, sessio
 ## Requirements
 
 - Xcode 17+ with an iOS 26 simulator runtime
-- Rust stable
-- `just`
+- `mise`
+- Xcode Command Line Tools
 - A container runtime if you want automatic Linux helper cross-builds (`Docker Desktop`, `Colima`, or `Podman`)
 
 ## Quick Start
 
 ```sh
+just tools-trust
+mise install
 just doctor
 just rust-build
 just ios-build
@@ -61,8 +63,10 @@ just ios-run
 Common full-workspace commands:
 
 ```sh
+just tools-trust
+just tools-install
+just tools-upgrade
 just rust-toolchain
-just rustup-update
 just cross-install
 just helper-cross-all
 just rust-test-all
@@ -83,7 +87,7 @@ xcodebuild test -project Roam/Roam.xcodeproj -scheme Roam -destination 'platform
 
 The iOS app includes a build phase that stages Linux helper binaries into the app bundle during normal Xcode builds.
 
-- If `cross` is installed, missing helper binaries can be built automatically for `x86_64-unknown-linux-musl` and `aarch64-unknown-linux-musl`
+- If `cross` is installed through `mise`, missing helper binaries can be built automatically for `x86_64-unknown-linux-musl` and `aarch64-unknown-linux-musl`
 - If `cross` is not installed, app builds still succeed, but helper install and upgrade flows will report missing binaries until you build them
 - Xcode GUI builds (`Cmd-B`, `Cmd-R`, `Cmd-U`) use the same build phase, so they can also trigger helper staging and auto-builds when `cross` is available
 

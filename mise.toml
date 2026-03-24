@@ -1,0 +1,10 @@
+# Roam repository toolchain
+# mise owns developer tool versions; just owns workflows.
+
+[tools]
+just = "1.43.1"
+rust = { version = "1.91.1", profile = "default", components = "clippy,rustfmt" }
+"cargo:cross" = { version = "0.2.5", locked = true }
+
+[settings]
+lockfile = true

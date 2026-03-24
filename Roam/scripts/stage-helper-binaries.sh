@@ -45,16 +45,26 @@ build_helper() {
         return 1
     fi
 
-    if ! command -v cross >/dev/null 2>&1; then
-        log "cross not installed; skipping automatic helper build for ${target}"
-        return 1
+    if command -v mise >/dev/null 2>&1 && (cd "${rust_workspace}" && mise exec -- cross --version >/dev/null 2>&1); then
+        log "building roam-helper for ${target} via mise-managed cross"
+        (
+            cd "${rust_workspace}"
+            mise exec -- cross build --release --target "${target}" --bin roam-helper
+        )
+        return 0
     fi
 
-    log "building roam-helper for ${target} via cross"
-    (
-        cd "${rust_workspace}"
-        cross build --release --target "${target}" --bin roam-helper
-    )
+    if command -v cross >/dev/null 2>&1; then
+        log "building roam-helper for ${target} via cross"
+        (
+            cd "${rust_workspace}"
+            cross build --release --target "${target}" --bin roam-helper
+        )
+        return 0
+    fi
+
+    log "cross not installed; skipping automatic helper build for ${target}"
+    return 1
 }
 
 stage_target() {
