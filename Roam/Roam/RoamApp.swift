@@ -45,24 +45,40 @@ struct RoamApp: App {
     }()
 
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
+    @State private var showSplash = true
+    private let urlSchemeHandler = URLSchemeHandler()
 
     var body: some Scene {
         WindowGroup {
-            Group {
-                if hasCompletedOnboarding {
-                    MainTabView()
-                        .overlay { BiometricGateOverlay() }
-                } else {
-                    OnboardingView()
+            ZStack {
+                Group {
+                    if hasCompletedOnboarding {
+                        MainTabView()
+                            .overlay { BiometricGateOverlay() }
+                    } else {
+                        OnboardingView()
+                    }
+                }
+                .preferredColorScheme(appearance.colorScheme)
+                .background {
+                    SessionLifecycleObserver()
+                }
+
+                if showSplash {
+                    SplashView {
+                        showSplash = false
+                    }
+                    .preferredColorScheme(appearance.colorScheme)
+                    .zIndex(1)
                 }
             }
-            .preferredColorScheme(appearance.colorScheme)
-            .background {
-                SessionLifecycleObserver()
+            .onOpenURL { url in
+                urlSchemeHandler.handle(url: url)
             }
         }
         .modelContainer(sharedModelContainer)
         .environment(sessionManager)
         .environment(workspaceResumeOrchestrator)
+        .environment(urlSchemeHandler)
     }
 }

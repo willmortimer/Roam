@@ -5,6 +5,7 @@ import SwiftTerm
 /// Bridges between SwiftUI lifecycle and the UIKit terminal emulator.
 struct TerminalViewRepresentable: UIViewRepresentable {
     let bridge: any TerminalSessionBridgeProtocol
+    let sessionState: TerminalSessionState
     var fontFamily: TerminalFontFamily = .system
     var fontSize: CGFloat = 13
 
@@ -37,17 +38,19 @@ struct TerminalViewRepresentable: UIViewRepresentable {
     }
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(bridge: bridge)
+        Coordinator(bridge: bridge, sessionState: sessionState)
     }
 
     // MARK: - Coordinator
 
     final class Coordinator: NSObject, TerminalViewDelegate {
         private let bridge: any TerminalSessionBridgeProtocol
+        private let sessionState: TerminalSessionState
         private var readTask: Task<Void, Never>?
 
-        init(bridge: any TerminalSessionBridgeProtocol) {
+        init(bridge: any TerminalSessionBridgeProtocol, sessionState: TerminalSessionState) {
             self.bridge = bridge
+            self.sessionState = sessionState
             super.init()
         }
 
@@ -59,6 +62,7 @@ struct TerminalViewRepresentable: UIViewRepresentable {
         func startReading(terminal: TerminalView) {
             readTask?.cancel()
             let bridge = bridge
+            let state = sessionState
             readTask = Task { [weak terminal] in
                 do {
                     for try await data in bridge.remoteDataStream() {
@@ -66,6 +70,7 @@ struct TerminalViewRepresentable: UIViewRepresentable {
                         let bytes = ArraySlice(data)
                         await MainActor.run {
                             terminal?.feed(byteArray: bytes)
+                            state.recordReceived(bytes: data.count)
                         }
                     }
                 } catch {
@@ -78,24 +83,37 @@ struct TerminalViewRepresentable: UIViewRepresentable {
 
         func send(source: TerminalView, data: ArraySlice<UInt8>) {
             let bridgeRef = bridge
+            let state = sessionState
             Task {
                 try? await bridgeRef.sendToRemote(Data(data))
+                await MainActor.run { state.recordSent(bytes: data.count) }
             }
         }
 
         func sizeChanged(source: TerminalView, newCols: Int, newRows: Int) {
             let bridgeRef = bridge
+            let state = sessionState
             Task {
                 try? await bridgeRef.resizePTY(columns: newCols, rows: newRows)
+                await MainActor.run {
+                    state.columns = newCols
+                    state.rows = newRows
+                }
             }
         }
 
         func setTerminalTitle(source: TerminalView, title: String) {
-            // Could update a @Published title property here
+            let state = sessionState
+            Task { @MainActor in
+                state.terminalTitle = title
+            }
         }
 
         func hostCurrentDirectoryUpdate(source: TerminalView, directory: String?) {
-            // Could track CWD for workspace context
+            let state = sessionState
+            Task { @MainActor in
+                state.currentWorkingDirectory = directory
+            }
         }
 
         func scrolled(source: TerminalView, position: Double) {
@@ -113,6 +131,7 @@ struct TerminalViewRepresentable: UIViewRepresentable {
             if let text = String(data: content, encoding: .utf8) {
                 Task { @MainActor in
                     UIPasteboard.general.string = text
+                    ClipboardHistoryService.shared.record(text: text)
                 }
             }
         }

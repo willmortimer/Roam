@@ -1,10 +1,8 @@
 # Cross-compilation configuration for roam-helper
-# Install cross: cargo install cross --git https://github.com/cross-rs/cross
+# Install cross: just cross-install
 # Build: cross build --release --target x86_64-unknown-linux-musl
 # Build: cross build --release --target aarch64-unknown-linux-musl
-
-[target.x86_64-unknown-linux-musl]
-image = "ghcr.io/cross-rs/x86_64-unknown-linux-musl:main"
-
-[target.aarch64-unknown-linux-musl]
-image = "ghcr.io/cross-rs/aarch64-unknown-linux-musl:main"
+#
+# We intentionally rely on cross's default target images so the image tag
+# matches the installed cross release instead of pinning a potentially
+# incompatible `:main` container.

@@ -6,6 +6,7 @@ struct HostListView: View {
     @Query(sort: \HostRecord.alias) private var hosts: [HostRecord]
     @State private var searchText = ""
     @State private var showingEditor = false
+    @State private var showingSFTPEditor = false
     @State private var showingImport = false
 
     var body: some View {
@@ -30,9 +31,13 @@ struct HostListView: View {
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Menu {
-                    Button("New Host", systemImage: "plus") {
+                    Button("New SSH Host", systemImage: "terminal") {
                         showingEditor = true
                     }
+                    Button("New SFTP Host", systemImage: "externaldrive.connected.to.line.below") {
+                        showingSFTPEditor = true
+                    }
+                    Divider()
                     Button("Import from SSH Config", systemImage: "square.and.arrow.down") {
                         showingImport = true
                     }
@@ -47,7 +52,12 @@ struct HostListView: View {
         }
         .sheet(isPresented: $showingEditor) {
             NavigationStack {
-                HostEditorView()
+                HostEditorView(initialHostType: .ssh)
+            }
+        }
+        .sheet(isPresented: $showingSFTPEditor) {
+            NavigationStack {
+                HostEditorView(initialHostType: .sftp)
             }
         }
         .sheet(isPresented: $showingImport) {
@@ -85,8 +95,20 @@ struct HostRow: View {
         return Date().timeIntervalSince(lastSeen) < 300 ? .connected : .disconnected
     }
 
+    private var hostIcon: String {
+        switch host.hostType {
+        case .ssh: "terminal"
+        case .sftp: "externaldrive.connected.to.line.below"
+        }
+    }
+
     var body: some View {
         HStack(alignment: .top, spacing: Spacing.md) {
+            Image(systemName: hostIcon)
+                .foregroundStyle(host.hostType == .sftp ? Color.accentColor : Color(.secondaryLabel))
+                .frame(width: 20)
+                .padding(.top, 4)
+
             ConnectionDot(state: liveness)
                 .padding(.top, 6)
 
@@ -97,9 +119,12 @@ struct HostRow: View {
                 AddressLabel(username: host.username, hostname: host.hostname, port: host.port)
 
                 HStack(spacing: Spacing.sm) {
+                    Text(host.hostType == .sftp ? "SFTP" : "SSH")
+                        .codeBadge(color: host.hostType == .sftp ? .accentColor : .Roam.dormant)
+
                     EnvironmentBadge(environment: host.environment)
 
-                    if host.preferredTransport == .mosh {
+                    if host.preferredTransport == .mosh && host.hostType == .ssh {
                         TransportBadge(transport: .mosh)
                     }
 
@@ -112,6 +137,6 @@ struct HostRow: View {
         }
         .padding(.vertical, Spacing.xs)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(host.alias), \(host.username) at \(host.hostname) port \(host.port), \(host.environment)")
+        .accessibilityLabel("\(host.hostType == .sftp ? "SFTP" : "SSH") host \(host.alias), \(host.username) at \(host.hostname) port \(host.port), \(host.environment)")
     }
 }

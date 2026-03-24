@@ -11,6 +11,10 @@ struct SessionView: View {
     @AppStorage(TerminalSettingsKeys.fontSize) private var terminalFontSize = 13.0
     let session: ManagedSession
     @Environment(\.dismiss) private var dismiss
+    @State private var sessionState = TerminalSessionState()
+    @State private var showingSaveAsWorkspace = false
+    @State private var showingSnippetPicker = false
+    @State private var showingSessionInfo = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -33,16 +37,27 @@ struct SessionView: View {
 
             TerminalViewRepresentable(
                 bridge: session.bridge,
+                sessionState: sessionState,
                 fontFamily: terminalFontFamily,
                 fontSize: terminalFontSize
             )
                 .ignoresSafeArea(.keyboard, edges: .bottom)
+
+            TerminalStatusBar(
+                session: session,
+                sessionState: sessionState,
+                onTap: { showingSessionInfo = true }
+            )
 
             ModifierKeyBar { key in
                 Task {
                     try? await session.bridge.sendToRemote(key.bytes)
                 }
             }
+        }
+        .onAppear {
+            sessionState.connectedAt = session.createdAt
+            fetchGitInfo()
         }
         .navigationTitle(session.hostAlias)
         .navigationBarTitleDisplayMode(.inline)
@@ -55,6 +70,15 @@ struct SessionView: View {
             }
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
+                    Button("Snippets", systemImage: "text.badge.star") {
+                        showingSnippetPicker = true
+                    }
+                    if session.restorationContext.workspaceID == nil {
+                        Button("Save as Workspace", systemImage: "square.and.arrow.down.on.square") {
+                            showingSaveAsWorkspace = true
+                        }
+                    }
+                    Divider()
                     Button("Disconnect", systemImage: "xmark.circle", role: .destructive) {
                         Task {
                             await sessionManager.disconnectSession(id: session.id)
@@ -65,6 +89,44 @@ struct SessionView: View {
                     Image(systemName: "ellipsis.circle")
                 }
                 .accessibilityLabel("Session options")
+            }
+        }
+        .sheet(isPresented: $showingSaveAsWorkspace) {
+            NavigationStack {
+                WorkspaceEditorView(prefill: SessionPrefill.from(session: session))
+            }
+        }
+        .sheet(isPresented: $showingSnippetPicker) {
+            SnippetPickerView(
+                workspaceID: session.restorationContext.workspaceID,
+                hostID: session.restorationContext.hostID
+            ) { command in
+                Task {
+                    let commandWithNewline = command + "\n"
+                    guard let data = commandWithNewline.data(using: .utf8) else { return }
+                    try? await session.bridge.sendToRemote(data)
+                }
+            }
+        }
+        .sheet(isPresented: $showingSessionInfo) {
+            SessionInfoPanel(session: session, sessionState: sessionState)
+        }
+    }
+
+    private func fetchGitInfo() {
+        guard let helper = session.helperClient,
+              let ws = workspace,
+              !ws.repoPath.isEmpty else { return }
+        Task {
+            do {
+                let status = try await helper.gitStatus(repoPath: ws.repoPath)
+                await MainActor.run {
+                    sessionState.gitBranch = status.branch
+                    sessionState.gitDirty = !status.clean
+                    sessionState.gitUncommittedCount = status.staged + status.modified + status.untracked
+                }
+            } catch {
+                // Helper may not support git_status — silently ignore
             }
         }
     }

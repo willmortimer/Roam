@@ -1,0 +1,78 @@
+name: release-helper
+
+on:
+  push:
+    tags:
+      - "helper-v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  CARGO_TERM_COLOR: always
+  CROSS_VERSION: "0.2.4"
+
+jobs:
+  build:
+    name: build-${{ matrix.target }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: x86_64-unknown-linux-musl
+            asset_name: roam-helper-linux-x86_64
+          - target: aarch64-unknown-linux-musl
+            asset_name: roam-helper-linux-aarch64
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install cross
+        run: cargo install cross --version "${CROSS_VERSION}" --locked
+
+      - name: Build helper
+        working-directory: roam-rs
+        run: cross build --release --target "${{ matrix.target }}" --bin roam-helper
+
+      - name: Package release asset
+        run: |
+          mkdir -p dist
+          cp "roam-rs/target/${{ matrix.target }}/release/roam-helper" "dist/${{ matrix.asset_name }}"
+          sha256sum "dist/${{ matrix.asset_name }}" > "dist/${{ matrix.asset_name }}.sha256"
+
+      - name: Upload packaged artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: helper-${{ matrix.target }}
+          path: dist/*
+          if-no-files-found: error
+
+  release:
+    name: publish-release
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/helper-v')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download packaged artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: helper-*
+          path: dist
+          merge-multiple: true
+
+      - name: Publish GitHub release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "${GITHUB_REF_NAME}" >/dev/null 2>&1; then
+            gh release upload "${GITHUB_REF_NAME}" dist/* --clobber
+          else
+            gh release create "${GITHUB_REF_NAME}" dist/* --title "${GITHUB_REF_NAME}" --generate-notes
+          fi

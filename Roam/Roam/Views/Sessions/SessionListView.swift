@@ -5,6 +5,25 @@ struct SessionListView: View {
     @Environment(SessionManager.self) private var sessionManager
     @Environment(WorkspaceResumeOrchestrator.self) private var resumeOrchestrator
     @Environment(\.modelContext) private var modelContext
+    @State private var searchText = ""
+
+    private var filteredSessions: [ManagedSession] {
+        if searchText.isEmpty { return sessionManager.sessions }
+        return sessionManager.sessions.filter {
+            $0.hostAlias.localizedCaseInsensitiveContains(searchText) ||
+            $0.hostname.localizedCaseInsensitiveContains(searchText) ||
+            ($0.restorationContext.workspaceName?.localizedCaseInsensitiveContains(searchText) ?? false)
+        }
+    }
+
+    private var filteredRestorables: [PersistedSessionSnapshot] {
+        if searchText.isEmpty { return sessionManager.restorableSessions }
+        return sessionManager.restorableSessions.filter {
+            $0.hostAlias.localizedCaseInsensitiveContains(searchText) ||
+            $0.hostname.localizedCaseInsensitiveContains(searchText) ||
+            ($0.workspaceName?.localizedCaseInsensitiveContains(searchText) ?? false)
+        }
+    }
 
     var body: some View {
         Group {
@@ -16,9 +35,9 @@ struct SessionListView: View {
                 )
             } else {
                 List {
-                    if !sessionManager.sessions.isEmpty {
+                    if !filteredSessions.isEmpty {
                         Section("Active") {
-                            ForEach(sessionManager.sessions) { session in
+                            ForEach(filteredSessions) { session in
                                 NavigationLink {
                                     SessionView(session: session)
                                 } label: {
@@ -29,9 +48,9 @@ struct SessionListView: View {
                         }
                     }
 
-                    if !sessionManager.restorableSessions.isEmpty {
+                    if !filteredRestorables.isEmpty {
                         Section("Restore") {
-                            ForEach(sessionManager.restorableSessions) { snapshot in
+                            ForEach(filteredRestorables) { snapshot in
                                 Button {
                                     Task {
                                         await sessionManager.retryRestorableSession(
@@ -54,6 +73,7 @@ struct SessionListView: View {
                         }
                     }
                 }
+                .searchable(text: $searchText, prompt: "Search sessions")
             }
         }
         .navigationTitle("Sessions")

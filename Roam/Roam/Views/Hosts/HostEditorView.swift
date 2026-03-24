@@ -8,6 +8,10 @@ struct HostEditorView: View {
     @Query(sort: \SSHKeyRecord.label) private var keys: [SSHKeyRecord]
 
     var existingHost: HostRecord?
+    var initialHostType: HostType = .ssh
+
+    // Host type
+    @State private var hostType: HostType = .ssh
 
     // Connection
     @State private var alias = ""
@@ -63,11 +67,14 @@ struct HostEditorView: View {
 
     var body: some View {
         Form {
+            hostTypeSection
             connectionSection
             authenticationSection
-            transportSection
-            if !allHosts.isEmpty {
-                jumpChainSection
+            if hostType == .ssh {
+                transportSection
+                if !allHosts.isEmpty {
+                    jumpChainSection
+                }
             }
             organizationSection
             notesSection
@@ -83,7 +90,39 @@ struct HostEditorView: View {
                 Button("Cancel") { dismiss() }
             }
         }
-        .onAppear { populateFromExisting() }
+        .onAppear {
+            if isNew { hostType = initialHostType }
+            populateFromExisting()
+        }
+    }
+
+    // MARK: - Host Type Section
+
+    private var hostTypeSection: some View {
+        Section {
+            Picker(selection: $hostType) {
+                Label("SSH", systemImage: "terminal").tag(HostType.ssh)
+                Label("SFTP", systemImage: "externaldrive.connected.to.line.below").tag(HostType.sftp)
+            } label: {
+                Label("Type", systemImage: "server.rack")
+            }
+            .pickerStyle(.segmented)
+            .onChange(of: hostType) { _, newType in
+                // Adjust default port when switching types on a new host
+                if isNew {
+                    port = newType == .sftp ? "22" : "22"
+                }
+            }
+        } footer: {
+            switch hostType {
+            case .ssh:
+                Text("Full SSH host — terminal, SFTP file browsing, port forwarding, and helper support.")
+                    .font(.caption)
+            case .sftp:
+                Text("SFTP-only host — file browsing and transfers. No terminal or port forwarding.")
+                    .font(.caption)
+            }
+        }
     }
 
     // MARK: - Connection Section
@@ -127,7 +166,10 @@ struct HostEditorView: View {
             Text("Connection")
         } footer: {
             if !hostname.isEmpty && !username.isEmpty {
-                Text("ssh \(username)@\(hostname)\(port != "22" ? " -p \(port)" : "")")
+                Text(hostType == .sftp
+                    ? "sftp \(username)@\(hostname)\(port != "22" ? " -P \(port)" : "")"
+                    : "ssh \(username)@\(hostname)\(port != "22" ? " -p \(port)" : "")"
+                )
                     .font(.mono(.caption))
                     .foregroundStyle(.secondary)
             }
@@ -340,6 +382,7 @@ struct HostEditorView: View {
 
     private func populateFromExisting() {
         guard let host = existingHost else { return }
+        hostType = host.hostType
         alias = host.alias
         hostname = host.hostname
         port = "\(host.port)"
@@ -367,13 +410,14 @@ struct HostEditorView: View {
         let parsedPort = Int(port) ?? 22
 
         if let host = existingHost {
+            host.hostType = hostType
             host.alias = alias
             host.hostname = hostname
             host.port = parsedPort
             host.username = username
             host.authMethod = authMethod
             host.keyReference = authMethod == .key ? selectedKeyID : nil
-            host.preferredTransport = transport
+            host.preferredTransport = hostType == .sftp ? .ssh : transport
             host.jumpChain = jumpChainIDs
             host.tags = parsedTags
             host.folder = folder.isEmpty ? nil : folder
@@ -387,15 +431,16 @@ struct HostEditorView: View {
                 hostname: hostname,
                 port: parsedPort,
                 username: username,
+                hostType: hostType,
                 authMethod: authMethod,
                 keyReference: authMethod == .key ? selectedKeyID : nil,
-                jumpChain: jumpChainIDs,
+                jumpChain: hostType == .sftp ? [] : jumpChainIDs,
                 tags: parsedTags,
                 folder: folder.isEmpty ? nil : folder,
                 notes: notes,
                 environment: environment,
                 trustClass: trustClass,
-                preferredTransport: transport
+                preferredTransport: hostType == .sftp ? .ssh : transport
             )
             modelContext.insert(host)
         }

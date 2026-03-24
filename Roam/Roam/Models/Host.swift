@@ -24,6 +24,7 @@ final class HostRecord {
     var lastSeen: Date?
     var lastHelperVersion: String?
     var lastHelperCheck: Date?
+    var hostType: HostType = HostType.ssh
     var preferredTransport: TransportType
     var vaultScope: String?
     var createdAt: Date
@@ -34,6 +35,7 @@ final class HostRecord {
         hostname: String,
         port: Int = 22,
         username: String,
+        hostType: HostType = .ssh,
         authMethod: AuthMethod = .key,
         keyReference: String? = nil,
         jumpChain: [String] = [],
@@ -49,6 +51,7 @@ final class HostRecord {
         self.hostname = hostname
         self.port = port
         self.username = username
+        self.hostType = hostType
         self.authMethod = authMethod
         self.keyReference = keyReference
         self.jumpChain = jumpChain
@@ -86,6 +89,11 @@ nonisolated enum TrustClass: String, Codable, CaseIterable, Sendable {
 nonisolated enum TransportType: String, Codable, CaseIterable, Sendable {
     case ssh
     case mosh
+}
+
+nonisolated enum HostType: String, Codable, CaseIterable, Sendable {
+    case ssh
+    case sftp
 }
 
 nonisolated enum FingerprintTrust: String, Codable, Sendable {

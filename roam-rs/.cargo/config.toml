@@ -1,5 +1,5 @@
 # Cross-compilation targets for roam-helper
-# Use `cross` tool for musl targets: cargo install cross
+# Use `cross` for musl targets: just cross-install
 # Build: cross build --release --target <target>
 
 [target.x86_64-unknown-linux-musl]

@@ -9,7 +9,7 @@
 /* Begin PBXBuildFile section */
 		AFE368DF2F6F4FC900A18110 /* Yams in Frameworks */ = {isa = PBXBuildFile; productRef = AFE36821BBBBBB0100000001 /* Yams */; };
 		AFE368E02F6F4FC900A18110 /* SwiftTerm in Frameworks */ = {isa = PBXBuildFile; productRef = AFE36821BBBBBB0100000002 /* SwiftTerm */; };
-		AFE368E12F6F4FC900A18110 /* RoamSSH in Frameworks */ = {isa = PBXBuildFile; productRef = AFE36821BBBBBB0100000003 /* RoamSSH */; };
+		AFE368E12F6F4FC900A18110 /* iDevSSH in Frameworks */ = {isa = PBXBuildFile; productRef = AFE36821BBBBBB0100000003 /* iDevSSH */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -18,48 +18,21 @@
 			containerPortal = AFE367FC2F6F451500A18110 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = AFE368032F6F451500A18110;
-			remoteInfo = Roam;
+			remoteInfo = iDev;
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		AFE368042F6F451500A18110 /* Roam.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Roam.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		AFE369012F6F500000A18110 /* RoamTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RoamTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		AFE368042F6F451500A18110 /* iDev.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iDev.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AFE369012F6F500000A18110 /* iDevTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = iDevTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
-
-/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		AFE368112F6F451600A18110 /* Exceptions for "Roam" folder in "Roam" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Info.plist,
-				Resources/Helpers/README.md,
-			);
-			target = AFE368032F6F451500A18110 /* Roam */;
-		};
-/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
-/* Begin PBXFileSystemSynchronizedRootGroup section */
-		AFE368062F6F451500A18110 /* Roam */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				AFE368112F6F451600A18110 /* Exceptions for "Roam" folder in "Roam" target */,
-			);
-			path = Roam;
-			sourceTree = "<group>";
-		};
-		AFE369022F6F500000A18110 /* RoamTests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = RoamTests;
-			sourceTree = "<group>";
-		};
-/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		AFE368012F6F451500A18110 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AFE368E12F6F4FC900A18110 /* RoamSSH in Frameworks */,
+				AFE368E12F6F4FC900A18110 /* iDevSSH in Frameworks */,
 				AFE368E02F6F4FC900A18110 /* SwiftTerm in Frameworks */,
 				AFE368DF2F6F4FC900A18110 /* Yams in Frameworks */,
 			);
@@ -78,8 +51,6 @@
 		AFE367FB2F6F451500A18110 = {
 			isa = PBXGroup;
 			children = (
-				AFE368062F6F451500A18110 /* Roam */,
-				AFE369022F6F500000A18110 /* RoamTests */,
 				AFE368052F6F451500A18110 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -87,8 +58,8 @@
 		AFE368052F6F451500A18110 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				AFE368042F6F451500A18110 /* Roam.app */,
-				AFE369012F6F500000A18110 /* RoamTests.xctest */,
+				AFE368042F6F451500A18110 /* iDev.app */,
+				AFE369012F6F500000A18110 /* iDevTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -96,9 +67,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		AFE368032F6F451500A18110 /* Roam */ = {
+		AFE368032F6F451500A18110 /* iDev */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = AFE368122F6F451600A18110 /* Build configuration list for PBXNativeTarget "Roam" */;
+			buildConfigurationList = AFE368122F6F451600A18110 /* Build configuration list for PBXNativeTarget "iDev" */;
 			buildPhases = (
 				AFE368002F6F451500A18110 /* Sources */,
 				AFE368012F6F451500A18110 /* Frameworks */,
@@ -109,22 +80,19 @@
 			);
 			dependencies = (
 			);
-			fileSystemSynchronizedGroups = (
-				AFE368062F6F451500A18110 /* Roam */,
-			);
-			name = Roam;
+			name = iDev;
 			packageProductDependencies = (
 				AFE36821BBBBBB0100000001 /* Yams */,
 				AFE36821BBBBBB0100000002 /* SwiftTerm */,
-				AFE36821BBBBBB0100000003 /* RoamSSH */,
+				AFE36821BBBBBB0100000003 /* iDevSSH */,
 			);
-			productName = Roam;
-			productReference = AFE368042F6F451500A18110 /* Roam.app */;
+			productName = iDev;
+			productReference = AFE368042F6F451500A18110 /* iDev.app */;
 			productType = "com.apple.product-type.application";
 		};
-		AFE369062F6F500000A18110 /* RoamTests */ = {
+		AFE369062F6F500000A18110 /* iDevTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = AFE3690B2F6F500000A18110 /* Build configuration list for PBXNativeTarget "RoamTests" */;
+			buildConfigurationList = AFE3690B2F6F500000A18110 /* Build configuration list for PBXNativeTarget "iDevTests" */;
 			buildPhases = (
 				AFE369032F6F500000A18110 /* Sources */,
 				AFE369042F6F500000A18110 /* Frameworks */,
@@ -135,12 +103,9 @@
 			dependencies = (
 				AFE369072F6F500000A18110 /* PBXTargetDependency */,
 			);
-			fileSystemSynchronizedGroups = (
-				AFE369022F6F500000A18110 /* RoamTests */,
-			);
-			name = RoamTests;
-			productName = RoamTests;
-			productReference = AFE369012F6F500000A18110 /* RoamTests.xctest */;
+			name = iDevTests;
+			productName = iDevTests;
+			productReference = AFE369012F6F500000A18110 /* iDevTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
@@ -162,7 +127,7 @@
 					};
 				};
 			};
-			buildConfigurationList = AFE367FF2F6F451500A18110 /* Build configuration list for PBXProject "Roam" */;
+			buildConfigurationList = AFE367FF2F6F451500A18110 /* Build configuration list for PBXProject "iDev" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -174,15 +139,15 @@
 			packageReferences = (
 				AFE36820AAAAAA0100000001 /* XCRemoteSwiftPackageReference "Yams" */,
 				AFE36820AAAAAA0100000002 /* XCRemoteSwiftPackageReference "SwiftTerm" */,
-				AFE36820AAAAAA0100000003 /* XCLocalSwiftPackageReference "Packages/RoamSSH" */,
+				AFE36820AAAAAA0100000003 /* XCLocalSwiftPackageReference "Packages/iDevSSH" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = AFE368052F6F451500A18110 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				AFE368032F6F451500A18110 /* Roam */,
-				AFE369062F6F500000A18110 /* RoamTests */,
+				AFE368032F6F451500A18110 /* iDev */,
+				AFE369062F6F500000A18110 /* iDevTests */,
 			);
 		};
 /* End PBXProject section */
@@ -214,15 +179,15 @@
 			);
 			inputPaths = (
 				"$(SRCROOT)/scripts/stage-helper-binaries.sh",
-				"$(SRCROOT)/../roam-rs/Cargo.toml",
-				"$(SRCROOT)/../roam-rs/Cross.toml",
+				"$(SRCROOT)/../iDev-rs/Cargo.toml",
+				"$(SRCROOT)/../iDev-rs/Cross.toml",
 			);
 			name = "Stage Helper Binaries";
 			outputFileListPaths = (
 			);
 			outputPaths = (
-				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/Helpers/roam-helper-x86_64-unknown-linux-musl",
-				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/Helpers/roam-helper-aarch64-unknown-linux-musl",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/Helpers/idev-helper-x86_64-unknown-linux-musl",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/Helpers/idev-helper-aarch64-unknown-linux-musl",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -251,7 +216,7 @@
 /* Begin PBXTargetDependency section */
 		AFE369072F6F500000A18110 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = AFE368032F6F451500A18110 /* Roam */;
+			target = AFE368032F6F451500A18110 /* iDev */;
 			targetProxy = AFE369082F6F500000A18110 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -262,13 +227,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = Roam/Roam.entitlements;
+				CODE_SIGN_ENTITLEMENTS = iDev/iDev.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = PQNKMDU3U3;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = Roam/Info.plist;
+				INFOPLIST_FILE = iDev/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -279,7 +244,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = willmortimer.Roam;
+				PRODUCT_BUNDLE_IDENTIFIER = willmortimer.iDev;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -296,13 +261,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = Roam/Roam.entitlements;
+				CODE_SIGN_ENTITLEMENTS = iDev/iDev.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = PQNKMDU3U3;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = Roam/Info.plist;
+				INFOPLIST_FILE = iDev/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -313,7 +278,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = willmortimer.Roam;
+				PRODUCT_BUNDLE_IDENTIFIER = willmortimer.iDev;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -455,14 +420,14 @@
 				DEVELOPMENT_TEAM = PQNKMDU3U3;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = willmortimer.RoamTests;
+				PRODUCT_BUNDLE_IDENTIFIER = willmortimer.iDevTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Roam.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Roam";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/iDev.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/iDev";
 			};
 			name = Debug;
 		};
@@ -475,21 +440,21 @@
 				DEVELOPMENT_TEAM = PQNKMDU3U3;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = willmortimer.RoamTests;
+				PRODUCT_BUNDLE_IDENTIFIER = willmortimer.iDevTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Roam.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Roam";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/iDev.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/iDev";
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		AFE367FF2F6F451500A18110 /* Build configuration list for PBXProject "Roam" */ = {
+		AFE367FF2F6F451500A18110 /* Build configuration list for PBXProject "iDev" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				AFE368152F6F451600A18110 /* Debug */,
@@ -498,7 +463,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		AFE368122F6F451600A18110 /* Build configuration list for PBXNativeTarget "Roam" */ = {
+		AFE368122F6F451600A18110 /* Build configuration list for PBXNativeTarget "iDev" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				AFE368132F6F451600A18110 /* Debug */,
@@ -507,7 +472,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		AFE3690B2F6F500000A18110 /* Build configuration list for PBXNativeTarget "RoamTests" */ = {
+		AFE3690B2F6F500000A18110 /* Build configuration list for PBXNativeTarget "iDevTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				AFE369092F6F500000A18110 /* Debug */,
@@ -519,9 +484,9 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		AFE36820AAAAAA0100000003 /* XCLocalSwiftPackageReference "Packages/RoamSSH" */ = {
+		AFE36820AAAAAA0100000003 /* XCLocalSwiftPackageReference "Packages/iDevSSH" */ = {
 			isa = XCLocalSwiftPackageReference;
-			relativePath = Packages/RoamSSH;
+			relativePath = Packages/iDevSSH;
 		};
 /* End XCLocalSwiftPackageReference section */
 
@@ -555,10 +520,10 @@
 			package = AFE36820AAAAAA0100000002 /* XCRemoteSwiftPackageReference "SwiftTerm" */;
 			productName = SwiftTerm;
 		};
-		AFE36821BBBBBB0100000003 /* RoamSSH */ = {
+		AFE36821BBBBBB0100000003 /* iDevSSH */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = AFE36820AAAAAA0100000003 /* XCLocalSwiftPackageReference "Packages/RoamSSH" */;
-			productName = RoamSSH;
+			package = AFE36820AAAAAA0100000003 /* XCLocalSwiftPackageReference "Packages/iDevSSH" */;
+			productName = iDevSSH;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

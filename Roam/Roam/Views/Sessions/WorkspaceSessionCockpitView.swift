@@ -1,9 +1,11 @@
 import SwiftUI
+import SwiftData
 
 struct WorkspaceSessionCockpitView: View {
     let session: ManagedSession
     let workspace: WorkspaceRecord
 
+    @Query(sort: \SnippetRecord.name) private var allSnippets: [SnippetRecord]
     @State private var panes: [TmuxPaneDTO] = []
     @State private var activeForwards: [ActiveForward] = []
     @State private var previewCandidateService = PreviewCandidateService()
@@ -12,6 +14,7 @@ struct WorkspaceSessionCockpitView: View {
     @State private var showingLensSheet = false
     @State private var showingPaneSheet = false
     @State private var showingPreviewCandidates = false
+    @State private var showingSnippetPicker = false
     @State private var paneRefreshTask: Task<Void, Never>?
     @State private var didBootstrap = false
     @State private var didAutoPresentPreviewDiscovery = false
@@ -28,10 +31,6 @@ struct WorkspaceSessionCockpitView: View {
                 }
 
                 quickActions
-
-                if !roleSummaries.isEmpty {
-                    roleStrip
-                }
 
                 if !activePreviewForwards.isEmpty || !mergedPreviewCandidates.isEmpty {
                     previewStrip
@@ -108,6 +107,14 @@ struct WorkspaceSessionCockpitView: View {
                 )
             }
         }
+        .sheet(isPresented: $showingSnippetPicker) {
+            SnippetPickerView(
+                workspaceID: workspace.id,
+                hostID: workspace.hostReference
+            ) { command in
+                Task { await executeSnippet(command) }
+            }
+        }
         .sheet(isPresented: $showingPreviewCandidates) {
             PreviewCandidatesSheet(
                 candidates: mergedPreviewCandidates,
@@ -132,30 +139,59 @@ struct WorkspaceSessionCockpitView: View {
     }
 
     private var header: some View {
-        HStack(alignment: .top, spacing: Spacing.sm) {
-            VStack(alignment: .leading, spacing: Spacing.xxs) {
-                Text(workspace.name)
-                    .font(.subheadline.bold())
+        VStack(alignment: .leading, spacing: Spacing.xs) {
+            HStack(alignment: .top, spacing: Spacing.sm) {
+                VStack(alignment: .leading, spacing: Spacing.xxs) {
+                    Text(workspace.name)
+                        .font(.subheadline.bold())
 
-                if !workspace.repoPath.isEmpty {
-                    Text(workspace.repoPath)
-                        .font(.caption.monospaced())
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
-                        .truncationMode(.head)
+                    if !workspace.repoPath.isEmpty {
+                        Text(workspace.repoPath)
+                            .font(.caption.monospaced())
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                            .truncationMode(.head)
+                    }
+                }
+
+                Spacer()
+
+                HStack(spacing: Spacing.xs) {
+                    if session.isHelperAvailable {
+                        Text("Live")
+                            .codeBadge(color: .Roam.alive)
+                    }
+
+                    if !panes.isEmpty {
+                        Text("\(panes.count) panes")
+                            .codeBadge(color: .Roam.dormant)
+                    }
                 }
             }
 
-            Spacer()
-
-            if session.isHelperAvailable {
-                Text("Live")
-                    .codeBadge(color: .Roam.alive)
+            if !roleSummaries.isEmpty {
+                compactRoleBar
             }
+        }
+    }
 
-            if !panes.isEmpty {
-                Text("\(panes.count) panes")
-                    .codeBadge(color: .Roam.dormant)
+    private var compactRoleBar: some View {
+        HStack(spacing: Spacing.xs) {
+            ForEach(roleSummaries, id: \.role) { summary in
+                HStack(spacing: 3) {
+                    Image(systemName: summary.role.icon)
+                        .font(.system(size: 9))
+                    Text(summary.role.rawValue.capitalized)
+                        .font(.caption2)
+                    if summary.count > 1 {
+                        Text("×\(summary.count)")
+                            .font(.caption2.monospacedDigit())
+                    }
+                }
+                .foregroundStyle(summary.role.color)
+                .padding(.horizontal, 6)
+                .padding(.vertical, 2)
+                .background(summary.role.color.opacity(0.1), in: Capsule())
             }
         }
     }
@@ -192,19 +228,10 @@ struct WorkspaceSessionCockpitView: View {
                 cockpitAction("Panes", systemImage: "rectangle.split.3x1") {
                     showingPaneSheet = true
                 }
-            }
-        }
-    }
 
-    private var roleStrip: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: Spacing.sm) {
-                ForEach(roleSummaries, id: \.role) { summary in
-                    HStack(spacing: Spacing.xs) {
-                        RoleBadge(role: summary.role)
-                        Text("\(summary.count)")
-                            .font(.caption2.monospacedDigit())
-                            .foregroundStyle(.secondary)
+                if hasMatchingSnippets {
+                    cockpitAction("Snippets", systemImage: "text.badge.star") {
+                        showingSnippetPicker = true
                     }
                 }
             }
@@ -298,6 +325,16 @@ struct WorkspaceSessionCockpitView: View {
                 .background(.fill.tertiary, in: Capsule())
         }
         .buttonStyle(.plain)
+    }
+
+    private var hasMatchingSnippets: Bool {
+        allSnippets.contains { snippet in
+            switch snippet.scope {
+            case .global: true
+            case .workspace(let id): id == workspace.id
+            case .host(let id): id == workspace.hostReference
+            }
+        }
     }
 
     private var roleSummaries: [(role: PaneRole, count: Int)] {
@@ -599,6 +636,17 @@ struct WorkspaceSessionCockpitView: View {
         }
 
         return forward.name
+    }
+
+    private func executeSnippet(_ command: String) async {
+        // Send the resolved command to the terminal bridge (types it into the active terminal)
+        let commandWithNewline = command + "\n"
+        guard let data = commandWithNewline.data(using: .utf8) else { return }
+        do {
+            try await session.bridge.sendToRemote(data)
+        } catch {
+            errorMessage = error.localizedDescription
+        }
     }
 
     private func lensSortOrder(for role: PaneRole) -> Int {

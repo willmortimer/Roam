@@ -196,7 +196,7 @@ final class WorkspaceResumeOrchestrator {
                     if decision == .install {
                         phase = .installingHelper
                         let arch = try await installService.detectArchitecture()
-                        let binaryData = try HelperBinaryLocator.binaryData(for: arch)
+                        let binaryData = try await HelperBinaryLocator.binaryData(for: arch)
 
                         switch detection {
                         case .outdated:

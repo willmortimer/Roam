@@ -6,6 +6,19 @@
 	<string>Roam uses Face ID to protect your SSH keys and vault access.</string>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>Roam uses the local network to test connectivity to SSH hosts on your LAN.</string>
+	<key>RoamHelperReleaseRepository</key>
+	<string>willmortimer/Roam</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>willmortimer.Roam</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>roam</string>
+			</array>
+		</dict>
+	</array>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>

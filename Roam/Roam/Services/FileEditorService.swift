@@ -80,6 +80,67 @@ final class FileEditorService {
         isSaving = false
     }
 
+    // MARK: - Local File Support
+
+    /// Load a local file from disk.
+    func loadLocalFile(url: URL) {
+        isLoading = true
+        errorMessage = nil
+        filePath = url.path
+        localFileURL = url
+
+        do {
+            let attrs = try FileManager.default.attributesOfItem(atPath: url.path)
+            let size = (attrs[.size] as? UInt64) ?? 0
+            fileSize = size
+
+            if size > Self.maxFileSize {
+                isReadOnly = true
+                errorMessage = "File is \(formatBytes(size)) — opened read-only (limit: 2 MB)"
+            }
+
+            let data = try Data(contentsOf: url)
+            if let text = String(data: data, encoding: .utf8) {
+                content = text
+            } else {
+                content = ""
+                isReadOnly = true
+                errorMessage = "File does not appear to be UTF-8 text"
+            }
+
+            isDirty = false
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+
+        isLoading = false
+    }
+
+    /// Save the current content back to the local file.
+    func saveLocalFile() {
+        guard let url = localFileURL, !isReadOnly else { return }
+        guard let data = content.data(using: .utf8) else {
+            errorMessage = "Failed to encode content as UTF-8"
+            return
+        }
+
+        isSaving = true
+        errorMessage = nil
+
+        do {
+            try data.write(to: url)
+            isDirty = false
+            fileSize = UInt64(data.count)
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+
+        isSaving = false
+    }
+
+    /// The local file URL if editing a local file.
+    var localFileURL: URL?
+
     private func formatBytes(_ bytes: UInt64) -> String {
         let formatter = ByteCountFormatter()
         formatter.countStyle = .file

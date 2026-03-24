@@ -182,7 +182,8 @@ nonisolated enum HelperInstallError: Error, LocalizedError, Sendable {
     case unsupportedArchitecture(String)
     case installFailed(String)
     case verificationFailed
-    case binaryNotFound(arch: String, searchedPaths: [String])
+    case binaryNotFound(arch: String, searchedPaths: [String], releaseURL: String?)
+    case binaryDownloadFailed(arch: String, searchedPaths: [String], releaseURL: String, message: String)
 
     var errorDescription: String? {
         switch self {
@@ -192,8 +193,17 @@ nonisolated enum HelperInstallError: Error, LocalizedError, Sendable {
             return "Helper install failed: \(msg)"
         case .verificationFailed:
             return "Helper installed but failed verification"
-        case .binaryNotFound(let arch, let searchedPaths):
+        case .binaryNotFound(let arch, let searchedPaths, let releaseURL):
             let paths = searchedPaths.map { "  - \($0)" }.joined(separator: "\n")
+            let releaseHint = if let releaseURL {
+                """
+
+                Roam also looked for a published helper release at:
+                  \(releaseURL)
+                """
+            } else {
+                ""
+            }
             return """
             No helper binary is available for \(arch).
 
@@ -201,13 +211,31 @@ nonisolated enum HelperInstallError: Error, LocalizedError, Sendable {
 
             Build it first with:
               cd roam-rs
+              just cross-install
+              just cross-host-toolchain
               cross build --release --target \(arch)
 
             Then either:
               - copy the binary into Roam/Roam/Resources/Helpers/ as roam-helper-\(arch), then rebuild the app
               - or leave it at roam-rs/target/\(arch)/release/roam-helper for debug builds
+              - or publish a GitHub release asset for tag helper-v\(HelperInstallService.requiredVersion)
 
             Searched paths:
+            \(paths)
+            \(releaseHint)
+            """
+        case .binaryDownloadFailed(let arch, let searchedPaths, let releaseURL, let message):
+            let paths = searchedPaths.map { "  - \($0)" }.joined(separator: "\n")
+            return """
+            Roam could not fetch the helper binary for \(arch).
+
+            Release URL:
+              \(releaseURL)
+
+            Download error:
+              \(message)
+
+            Local paths checked first:
             \(paths)
             """
         }

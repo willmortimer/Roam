@@ -99,10 +99,10 @@ struct OverviewView: View {
                 .tracking(4)
                 .foregroundStyle(.secondary)
 
-            Text("Remote Work, Ready to Resume")
+            Text("Your Remote Dev Flow, One Tap Away")
                 .font(.title2.bold())
 
-            Text("Jump back into recent workspaces, reconnect to hosts, and recover session context without digging through separate tools.")
+            Text("Resume workspaces, reconnect sessions, and pick up exactly where you left off.")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
 
@@ -163,12 +163,15 @@ struct OverviewView: View {
                 .buttonStyle(.plain)
 
                 NavigationLink {
-                    FileBrowserView(sftpChannel: nil)
+                    LocalFileBrowserView(
+                        initialURL: LocalFileService.shared.homeDirectory
+                            .appendingPathComponent("Notes", isDirectory: true)
+                    )
                 } label: {
                     OverviewActionTile(
-                        title: "Files",
-                        subtitle: "Open the remote file browser",
-                        symbol: "folder"
+                        title: "Notes",
+                        subtitle: "Markdown notes in your local Roam folder",
+                        symbol: "doc.plaintext"
                     )
                 }
                 .buttonStyle(.plain)

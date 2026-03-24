@@ -1,10 +1,10 @@
-# Roam repository toolchain
-# mise owns developer tool versions; just owns workflows.
+# Roam repository auxiliary tooling
+# Xcode, Rust/Cargo, and just stay at their native layers.
+# mise manages the extra repo CLIs that sit around them.
 
 [tools]
-just = "1.43.1"
-rust = { version = "1.91.1", profile = "default", components = "clippy,rustfmt" }
-"cargo:cross" = { version = "0.2.5", locked = true }
+python = "3.13.9"
+"cargo:cross" = { version = "0.2.4", locked = true }
 
 [settings]
 lockfile = true

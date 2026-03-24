@@ -4,6 +4,7 @@ import SwiftData
 struct WorkspaceListView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \WorkspaceRecord.lastOpened, order: .reverse) private var workspaces: [WorkspaceRecord]
+    @Query(sort: \HostRecord.alias) private var hosts: [HostRecord]
     @State private var searchText = ""
     @State private var showingEditor = false
 
@@ -18,7 +19,10 @@ struct WorkspaceListView: View {
             } else {
                 ForEach(filteredWorkspaces, id: \.id) { workspace in
                     NavigationLink(value: WorkspaceNavigationTarget(id: workspace.id)) {
-                        WorkspaceRow(workspace: workspace)
+                        WorkspaceRow(
+                            workspace: workspace,
+                            hostAlias: hosts.first { $0.id == workspace.hostReference }?.alias
+                        )
                     }
                 }
                 .onDelete(perform: deleteWorkspaces)
@@ -47,6 +51,8 @@ struct WorkspaceListView: View {
         if searchText.isEmpty { return workspaces }
         return workspaces.filter {
             $0.name.localizedCaseInsensitiveContains(searchText) ||
+            $0.environment.localizedCaseInsensitiveContains(searchText) ||
+            $0.repoPath.localizedCaseInsensitiveContains(searchText) ||
             $0.tags.contains(where: { $0.localizedCaseInsensitiveContains(searchText) })
         }
     }
@@ -64,13 +70,19 @@ private struct WorkspaceNavigationTarget: Hashable {
 
 struct WorkspaceRow: View {
     let workspace: WorkspaceRecord
+    var hostAlias: String? = nil
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.xs) {
             Text(workspace.name)
                 .font(.headline)
 
-            if !workspace.descriptionText.isEmpty {
+            if let hostAlias {
+                Text(hostAlias)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+            } else if !workspace.descriptionText.isEmpty {
                 Text(workspace.descriptionText)
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
@@ -99,6 +111,6 @@ struct WorkspaceRow: View {
         }
         .padding(.vertical, Spacing.xs)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(workspace.name), \(workspace.environment) workspace")
+        .accessibilityLabel("\(workspace.name), \(hostAlias ?? ""), \(workspace.environment) workspace")
     }
 }

@@ -26,12 +26,21 @@ struct HostDetailView: View {
         hosts.first { $0.id == hostID }
     }
 
+    private var activeSessionsForHost: [ManagedSession] {
+        sessionManager.sessions.filter { $0.restorationContext.hostID == hostID }
+    }
+
     var body: some View {
         if let host {
             ScrollView {
                 VStack(spacing: Spacing.lg) {
                     connectionHeader(host)
                     badgeStrip(host)
+
+                    if !activeSessionsForHost.isEmpty {
+                        activeSessionsCard(host)
+                    }
+
                     connectionCard(host)
                     diagnosticsCard(host)
                     helperCard(host)
@@ -187,6 +196,51 @@ struct HostDetailView: View {
                     .codeBadge(color: .Roam.dormant)
             }
         }
+    }
+
+    // MARK: - Active Sessions Card
+
+    private func activeSessionsCard(_ host: HostRecord) -> some View {
+        VStack(alignment: .leading, spacing: Spacing.sm) {
+            Label("Active Sessions", systemImage: "terminal")
+                .font(.subheadline.bold())
+                .foregroundStyle(.secondary)
+
+            ForEach(activeSessionsForHost) { session in
+                HStack(spacing: Spacing.sm) {
+                    ConnectionDot(state: session.connectionLiveness)
+
+                    VStack(alignment: .leading, spacing: Spacing.xxs) {
+                        Text(session.restorationContext.workspaceName ?? session.hostAlias)
+                            .font(.subheadline)
+
+                        Text(sessionUptime(session))
+                            .font(.caption.monospacedDigit())
+                            .foregroundStyle(.secondary)
+                    }
+
+                    Spacer()
+
+                    TransportBadge(transport: session.transportType)
+                }
+                .padding(.vertical, Spacing.xs)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .cardStyle()
+    }
+
+    private func sessionUptime(_ session: ManagedSession) -> String {
+        let elapsed = Date().timeIntervalSince(session.createdAt)
+        if elapsed < 60 { return "\(Int(elapsed))s" }
+        if elapsed < 3600 {
+            let m = Int(elapsed) / 60
+            let s = Int(elapsed) % 60
+            return "\(m)m \(s)s"
+        }
+        let h = Int(elapsed) / 3600
+        let m = (Int(elapsed) % 3600) / 60
+        return "\(h)h \(m)m"
     }
 
     // MARK: - Connection Info Card
@@ -754,7 +808,7 @@ struct HostDetailView: View {
 
         do {
             let arch = try await installService.detectArchitecture()
-            let binaryData = try HelperBinaryLocator.binaryData(for: arch)
+            let binaryData = try await HelperBinaryLocator.binaryData(for: arch)
 
             switch detectionResult {
             case .outdated:

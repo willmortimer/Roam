@@ -7,6 +7,7 @@ struct WorkspaceEditorView: View {
     @Query(sort: \HostRecord.alias) private var hosts: [HostRecord]
 
     var existingWorkspace: WorkspaceRecord?
+    var prefill: SessionPrefill?
 
     // Step 1: Basics
     @State private var name = ""
@@ -380,19 +381,79 @@ struct WorkspaceEditorView: View {
     // MARK: - Load Existing
 
     private func loadExisting() {
-        guard let ws = existingWorkspace else { return }
-        name = ws.name
-        descriptionText = ws.descriptionText
-        environment = ws.environment
-        selectedHostID = ws.hostReference
-        shell = ws.shell
-        repoPath = ws.repoPath
-        tmuxSessionName = ws.tmuxSessionName
-        preferredAgentCommand = ws.preferredAgentCommand ?? ""
-        notes = ws.notes
-        tags = ws.tags.joined(separator: ", ")
-        panes = ws.tmuxPanes
-        forwards = ws.savedForwards
-        autoDetectPreviews = ws.previewRules.autoDetect
+        if let ws = existingWorkspace {
+            name = ws.name
+            descriptionText = ws.descriptionText
+            environment = ws.environment
+            selectedHostID = ws.hostReference
+            shell = ws.shell
+            repoPath = ws.repoPath
+            tmuxSessionName = ws.tmuxSessionName
+            preferredAgentCommand = ws.preferredAgentCommand ?? ""
+            notes = ws.notes
+            tags = ws.tags.joined(separator: ", ")
+            panes = ws.tmuxPanes
+            forwards = ws.savedForwards
+            autoDetectPreviews = ws.previewRules.autoDetect
+        } else if let prefill {
+            selectedHostID = prefill.hostID
+            repoPath = prefill.repoPath
+            tmuxSessionName = prefill.tmuxSessionName
+            panes = prefill.panes
+            forwards = prefill.forwards
+            name = prefill.suggestedName
+        }
+    }
+}
+
+// MARK: - Session Prefill
+
+/// Pre-populated workspace fields derived from an active session.
+struct SessionPrefill {
+    var hostID: String
+    var suggestedName: String
+    var repoPath: String
+    var tmuxSessionName: String
+    var panes: [PaneDefinition]
+    var forwards: [ForwardDefinition]
+
+    /// Build a prefill from a live ManagedSession.
+    static func from(session: ManagedSession) -> SessionPrefill {
+        // Derive pane definitions from detected tmux panes
+        let paneDefinitions: [PaneDefinition] = session.tmuxPanes.compactMap { pane in
+            guard let role = WorkspaceResumeOrchestrator.inferPaneRole(from: pane) else {
+                return nil
+            }
+            return PaneDefinition(role: role, window: pane.window)
+        }
+
+        // Derive forward definitions from active forwards
+        let forwardDefinitions: [ForwardDefinition] = session.forwardService?.activeForwards.map { fwd in
+            ForwardDefinition(
+                name: fwd.name,
+                remoteHost: fwd.remoteHost,
+                remotePort: fwd.remotePort,
+                localPort: fwd.resolvedLocalPort,
+                autoPreview: false
+            )
+        } ?? []
+
+        // Infer repo path from the first pane's cwd, or empty
+        let repoPath = session.tmuxPanes.first(where: { !$0.cwd.isEmpty })?.cwd ?? ""
+
+        // Suggest a name from the host alias
+        let suggestedName = session.hostAlias
+
+        // tmux session name from resume plan
+        let tmuxName = session.resumePlan?.recommended_attach_target ?? session.hostAlias
+
+        return SessionPrefill(
+            hostID: session.restorationContext.hostID,
+            suggestedName: suggestedName,
+            repoPath: repoPath,
+            tmuxSessionName: tmuxName,
+            panes: paneDefinitions,
+            forwards: forwardDefinitions
+        )
     }
 }

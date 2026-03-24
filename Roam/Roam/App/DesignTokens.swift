@@ -18,7 +18,7 @@ enum Spacing {
 
 /// Top-level namespace for Roam semantic colors.
 /// Accessible as `.Roam.alive` in both `Color` and `ShapeStyle` contexts.
-enum IDevPalette {
+enum RoamPalette {
     static let codeBackground = Color("CodeBackground", bundle: .main)
     static let cardSurface = Color(UIColor.secondarySystemGroupedBackground)
     static let alive = Color("TerminalGreen", bundle: .main)
@@ -45,12 +45,12 @@ enum IDevPalette {
 
 /// Enables `.Roam.alive` inside `.foregroundStyle()` and other ShapeStyle contexts.
 extension ShapeStyle where Self == Color {
-    static var Roam: IDevPalette.Type { IDevPalette.self }
+    static var Roam: RoamPalette.Type { RoamPalette.self }
 }
 
 /// Enables `Color.Roam.alive` for explicit Color references.
 extension Color {
-    static var Roam: IDevPalette.Type { IDevPalette.self }
+    static var Roam: RoamPalette.Type { RoamPalette.self }
 }
 
 // MARK: - Typography
@@ -76,7 +76,7 @@ struct CardStyle: ViewModifier {
     func body(content: Content) -> some View {
         content
             .padding(Spacing.md)
-            .background(IDevPalette.cardSurface, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .background(RoamPalette.cardSurface, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
             .shadow(
                 color: colorScheme == .dark ? .clear : .black.opacity(0.06),
                 radius: 3, x: 0, y: 1
@@ -143,7 +143,7 @@ struct EnvironmentBadge: View {
 
     var body: some View {
         Text(label)
-            .codeBadge(color: IDevPalette.environmentColor(environment))
+            .codeBadge(color: RoamPalette.environmentColor(environment))
     }
 }
 
@@ -161,7 +161,7 @@ struct TrustBadge: View {
 
     var body: some View {
         Text(label)
-            .codeBadge(color: IDevPalette.trustColor(trustClass))
+            .codeBadge(color: RoamPalette.trustColor(trustClass))
     }
 }
 
@@ -171,7 +171,7 @@ struct TransportBadge: View {
 
     var body: some View {
         Text(transport.rawValue.uppercased())
-            .codeBadge(color: transport == .mosh ? IDevPalette.caution : IDevPalette.dormant)
+            .codeBadge(color: transport == .mosh ? RoamPalette.caution : RoamPalette.dormant)
     }
 }
 
@@ -188,10 +188,10 @@ struct ConnectionDot: View {
 
     private var color: Color {
         switch state {
-        case .connected: IDevPalette.alive
-        case .connecting: IDevPalette.caution
-        case .disconnected: IDevPalette.danger
-        case .unknown: IDevPalette.dormant
+        case .connected: RoamPalette.alive
+        case .connecting: RoamPalette.caution
+        case .disconnected: RoamPalette.danger
+        case .unknown: RoamPalette.dormant
         }
     }
 
