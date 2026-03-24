@@ -14,8 +14,8 @@ Optional but useful:
 
 ## Directory Map
 
-- `iDev/`: Xcode project, Swift app sources, local Swift package
-- `iDev-rs/`: Cargo workspace
+- `Roam/`: Xcode project, Swift app sources, local Swift package
+- `roam-rs/`: Cargo workspace
 - `docs/`: design and project documentation
 - `justfile`: root task entrypoint
 
@@ -41,20 +41,20 @@ just loc
 Rust workspace:
 
 ```sh
-cd iDev-rs
+cd roam-rs
 cargo test --workspace
 ```
 
 iOS build:
 
 ```sh
-xcodebuild -project iDev/iDev.xcodeproj -scheme iDev -destination 'generic/platform=iOS Simulator' -derivedDataPath /tmp/idev-derived build
+xcodebuild -project Roam/Roam.xcodeproj -scheme Roam -destination 'generic/platform=iOS Simulator' -derivedDataPath /tmp/roam-derived build
 ```
 
 iOS tests:
 
 ```sh
-xcodebuild test -project iDev/iDev.xcodeproj -scheme iDev -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -derivedDataPath /tmp/idev-test-derived
+xcodebuild test -project Roam/Roam.xcodeproj -scheme Roam -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -derivedDataPath /tmp/roam-test-derived
 ```
 
 ## Notes
@@ -65,7 +65,7 @@ xcodebuild test -project iDev/iDev.xcodeproj -scheme iDev -destination 'platform
 
 ## What To Keep Out Of Git
 
-- `iDev-rs/target/`
+- `roam-rs/target/`
 - Xcode user state and `xcuserdata`
 - SwiftPM build directories
 - local logs, temp directories, and sync data

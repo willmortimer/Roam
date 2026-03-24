@@ -1,12 +1,17 @@
-# iDev project — local build and test recipes
-# Usage: just <recipe>  (run from ~/Developer/iDev)
+# Roam project — local build and test recipes
+# Usage: just <recipe>  (run from ~/Developer/Roam)
 
 set shell := ["zsh", "-cu"]
 
-ios_dir     := "iDev"
-rs_dir      := "iDev-rs"
-scheme      := "iDev"
-simulator   := "iPhone 17 Pro"
+ios_dir           := "Roam"
+ios_project       := "Roam/Roam.xcodeproj"
+rs_dir            := "roam-rs"
+scheme            := "Roam"
+bundle_id         := "willmortimer.Roam"
+simulator         := "iPhone 17 Pro"
+derived_data      := "/tmp/roam-derived"
+test_derived_data := "/tmp/roam-test-derived"
+app_bundle        := "/tmp/roam-derived/Build/Products/Debug-iphonesimulator/Roam.app"
 
 # ── Default ──────────────────────────────────────────────────────────────────
 
@@ -14,6 +19,10 @@ simulator   := "iPhone 17 Pro"
 default: build
 
 # ── Rust helper ──────────────────────────────────────────────────────────────
+
+# Install `cross` for Linux helper cross-compilation
+cross-install:
+    cargo install cross --git https://github.com/cross-rs/cross
 
 # Build Rust helper (debug)
 rust-build:
@@ -25,7 +34,7 @@ rust-release:
 
 # Run helper unit + integration tests
 rust-test:
-    cd {{rs_dir}} && cargo test -p idev-helper
+    cd {{rs_dir}} && cargo test -p roam-helper
 
 # Run Rust clippy lints
 rust-lint:
@@ -39,27 +48,35 @@ rust-cross-x86:
 rust-cross-arm:
     cd {{rs_dir}} && cross build --release --target aarch64-unknown-linux-musl
 
+# Build both Linux helper binaries used by the app installer
+helper-cross-all: rust-cross-x86 rust-cross-arm
+
+# Show where helper cross-build outputs are expected
+helper-paths:
+    @echo "{{rs_dir}}/target/x86_64-unknown-linux-musl/release/roam-helper"
+    @echo "{{rs_dir}}/target/aarch64-unknown-linux-musl/release/roam-helper"
+
 # Show Rust helper binary size (release)
 rust-size: rust-release
-    ls -lh {{rs_dir}}/target/release/idev-helper | awk '{print $5, $9}'
+    ls -lh {{rs_dir}}/target/release/roam-helper | awk '{print $5, $9}'
 
 # ── Sync server ──────────────────────────────────────────────────────────────
 
 # Build sync server (debug)
 sync-build:
-    cd {{rs_dir}} && cargo build -p idev-sync-server
+    cd {{rs_dir}} && cargo build -p roam-sync-server
 
 # Build sync server (release)
 sync-release:
-    cd {{rs_dir}} && cargo build -p idev-sync-server --release
+    cd {{rs_dir}} && cargo build -p roam-sync-server --release
 
 # Run sync server tests (unit + integration)
 sync-test:
-    cd {{rs_dir}} && cargo test -p idev-sync-server
+    cd {{rs_dir}} && cargo test -p roam-sync-server
 
 # Build sync server Docker image
 sync-docker:
-    cd {{rs_dir}}/sync-server && docker build -t idev-sync-server .
+    cd {{rs_dir}}/sync-server && docker build -t roam-sync-server .
 
 # ── Combined Rust ────────────────────────────────────────────────────────────
 
@@ -73,19 +90,67 @@ rust-lint-all:
 
 # ── iOS app ──────────────────────────────────────────────────────────────────
 
-# Build iOS app for simulator
+# Open and boot the configured simulator
+sim-open:
+    open -a Simulator
+    xcrun simctl boot "{{simulator}}" >/dev/null 2>&1 || true
+    xcrun simctl bootstatus "{{simulator}}" -b
+
+# Shut down the configured simulator
+sim-shutdown:
+    xcrun simctl shutdown "{{simulator}}" >/dev/null 2>&1 || true
+
+# Open the Xcode project
+xcode-open:
+    open {{ios_project}}
+
+# Build iOS app for simulator and run Xcode's helper staging phase
 ios-build:
-    cd {{ios_dir}} && xcodebuild build \
+    xcodebuild build \
+        -project {{ios_project}} \
         -scheme {{scheme}} \
         -destination 'platform=iOS Simulator,name={{simulator}}' \
+        -derivedDataPath {{derived_data}} \
         -quiet
 
 # Build iOS app and show only errors/warnings
 ios-check:
-    cd {{ios_dir}} && xcodebuild build \
+    xcodebuild build \
+        -project {{ios_project}} \
         -scheme {{scheme}} \
         -destination 'platform=iOS Simulator,name={{simulator}}' \
+        -derivedDataPath {{derived_data}} \
         2>&1 | grep -E '(error:|warning:|BUILD)' || true
+
+# Clean iOS build products
+ios-clean:
+    xcodebuild clean \
+        -project {{ios_project}} \
+        -scheme {{scheme}} \
+        -destination 'platform=iOS Simulator,name={{simulator}}' \
+        -derivedDataPath {{derived_data}} \
+        -quiet
+
+# Run iOS unit tests from the CLI
+ios-test: sim-open
+    xcodebuild test \
+        -project {{ios_project}} \
+        -scheme {{scheme}} \
+        -destination 'platform=iOS Simulator,name={{simulator}}' \
+        -derivedDataPath {{test_derived_data}} \
+        -quiet
+
+# Install the built app into the configured simulator
+ios-install: ios-build sim-open
+    xcrun simctl install "{{simulator}}" "{{app_bundle}}"
+
+# Launch the installed app in the configured simulator
+ios-launch: sim-open
+    xcrun simctl launch "{{simulator}}" "{{bundle_id}}"
+
+# Build, install, and launch the app in the configured simulator
+ios-run: ios-install
+    xcrun simctl launch "{{simulator}}" "{{bundle_id}}"
 
 # ── Combined ─────────────────────────────────────────────────────────────────
 
@@ -99,6 +164,20 @@ test: rust-test-all
 check: rust-lint-all ios-check
     @echo "✓ All checks passed"
 
+# Quick local tooling status
+doctor:
+    @echo "── Core tools ──"
+    @if command -v just >/dev/null 2>&1; then echo "just:   $(command -v just)"; else echo "just:   missing"; fi
+    @if command -v cargo >/dev/null 2>&1; then echo "cargo:  $(command -v cargo)"; else echo "cargo:  missing"; fi
+    @if command -v cross >/dev/null 2>&1; then echo "cross:  $(command -v cross)"; else echo "cross:  missing"; fi
+    @if command -v xcodebuild >/dev/null 2>&1; then echo "xcodebuild: $(command -v xcodebuild)"; else echo "xcodebuild: missing"; fi
+    @if command -v xcrun >/dev/null 2>&1; then echo "xcrun:  $(command -v xcrun)"; else echo "xcrun:  missing"; fi
+    @echo "── Container runtime ──"
+    @if command -v docker >/dev/null 2>&1; then echo "docker: $(command -v docker)"; elif command -v colima >/dev/null 2>&1; then echo "colima: $(command -v colima)"; elif command -v podman >/dev/null 2>&1; then echo "podman: $(command -v podman)"; else echo "container runtime: missing"; fi
+    @echo "── Helper outputs ──"
+    @if [ -f "{{rs_dir}}/target/x86_64-unknown-linux-musl/release/roam-helper" ]; then echo "x86_64 helper: present"; else echo "x86_64 helper: missing"; fi
+    @if [ -f "{{rs_dir}}/target/aarch64-unknown-linux-musl/release/roam-helper" ]; then echo "aarch64 helper: present"; else echo "aarch64 helper: missing"; fi
+
 # ── Utilities ────────────────────────────────────────────────────────────────
 
 # Count lines of code by language
@@ -108,7 +187,7 @@ loc:
     @echo "── Rust (sync-server) ──"
     @find {{rs_dir}}/sync-server/src -name '*.rs' | xargs wc -l | tail -1
     @echo "── Swift ──"
-    @find {{ios_dir}}/iDev -name '*.swift' | xargs wc -l | tail -1
+    @find {{ios_dir}}/Roam -name '*.swift' | xargs wc -l | tail -1
 
 # List all RPC methods registered in the helper (32 total as of Phase 4)
 rpc-methods:

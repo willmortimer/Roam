@@ -19,7 +19,7 @@ If that answer is messy, fragile, or slow, the product experience will feel hack
 
 ---
 
-## 1. What Mosh Is and Why It Matters for iDev
+## 1. What Mosh Is and Why It Matters for Roam
 
 Mosh (Mobile Shell) replaces SSH's TCP byte-stream with a **UDP-based State Synchronization Protocol (SSP)**. Instead of streaming every byte, Mosh sends diffs of the current terminal screen state. This gives:
 
@@ -40,7 +40,7 @@ For an iOS SSH client where the user constantly switches between Wi-Fi and cellu
 
 **How Mosh renders today**: The Mosh server runs its own terminal emulator (`terminal.cc`). It processes the shell's VT100 output into a 2D character grid (rows x cols, each cell = character + attributes). The SSP sends **diffs of this grid** to the client. The client applies diffs to its local copy of the grid, then renders it to the screen.
 
-**How iDev renders today**: SSH pipes raw VT100 bytes → SwiftTerm parses them → SwiftTerm maintains its own internal grid → SwiftTerm renders to screen.
+**How Roam renders today**: SSH pipes raw VT100 bytes → SwiftTerm parses them → SwiftTerm maintains its own internal grid → SwiftTerm renders to screen.
 
 **The mismatch**: We receive grid diffs from Mosh, but SwiftTerm expects raw VT100 bytes. We must choose how to bridge this.
 
@@ -110,7 +110,7 @@ Mosh SSP Updates ─────────────────────
 Phase 1: SSH Bootstrap
   Client SSHes into remote → runs `mosh-server new -c 256 -l LANG=en_US.UTF-8`
   Server outputs: MOSH CONNECT <udp_port> <base64_aes_key>
-  SSH connection can close (but iDev keeps it for SFTP/helper/forwards).
+  SSH connection can close (but Roam keeps it for SFTP/helper/forwards).
 
 Phase 2: UDP Session
   Client opens UDP socket to server:<udp_port>
@@ -160,7 +160,7 @@ We do **not** need: `terminal/` (our app does rendering), `frontend/mosh-server.
 
 ---
 
-## 4. Integration Architecture with iDev
+## 4. Integration Architecture with Roam
 
 ### 4.1 Where Mosh Fits
 
@@ -233,7 +233,7 @@ The recommended shape is **C3: Hybrid Rust + Swift**:
 
 ```
                     ┌────────────────────────────────────────────────┐
-                    │              Rust (idev-mosh crate)            │
+                    │              Rust (roam-mosh crate)            │
                     │                                                │
  Swift UDP recv ──→ │ process_incoming_datagram(bytes)               │
                     │   → decrypt (AES-128-OCB)                     │
@@ -357,7 +357,7 @@ v2 additions:
 
 **This question should be answered immediately, because it can eliminate half the decision tree.**
 
-Mosh is GPL-3. Blink's fork is GPL-3. If iDev's intended licensing or business model is not GPL-compatible, then Bucket 1 (vendor/fork C++ approaches A and B) is **strategically toxic**, not just "something to evaluate."
+Mosh is GPL-3. Blink's fork is GPL-3. If Roam's intended licensing or business model is not GPL-compatible, then Bucket 1 (vendor/fork C++ approaches A and B) is **strategically toxic**, not just "something to evaluate."
 
 A clean-room reimplementation (Bucket 2) eliminates this concern entirely. The Rust `ocb3` and `prost` crates are MIT/Apache-2.0. No GPL code touches the binary.
 
@@ -484,7 +484,7 @@ Before committing to a full Mosh implementation, build a **one-week prototype** 
 
 ### Week 1 Prototype Scope
 
-1. **Rust crate** (`idev-mosh`): Hardcoded AES-128-OCB decrypt of a captured Mosh datagram. Parse protobuf HostOutput. Extract terminal grid state from SSP diff. Return as a flat `Vec<CellUpdate>`.
+1. **Rust crate** (`roam-mosh`): Hardcoded AES-128-OCB decrypt of a captured Mosh datagram. Parse protobuf HostOutput. Extract terminal grid state from SSP diff. Return as a flat `Vec<CellUpdate>`.
 
 2. **Swift test harness**: Connect to a real `mosh-server` via SSH bootstrap. Open NWConnection UDP socket. Receive one HostOutput frame. Pass bytes through Rust FFI. Get back grid updates. Render them via R1 (synthesize VT100 → feed to SwiftTerm).
 
@@ -503,12 +503,12 @@ If the prototype renders correctly for these three cases, proceed with full impl
 
 ## 16. Implementation Plan (Assuming C3 Hybrid + R1 Rendering)
 
-### Phase A: Rust Mosh Crate (idev-mosh)
+### Phase A: Rust Mosh Crate (roam-mosh)
 
-New Rust crate in the `iDev-rs` workspace:
+New Rust crate in the `roam-rs` workspace:
 
 ```
-iDev-rs/
+roam-rs/
 ├── Cargo.toml                    # workspace: helper, sync-server, mosh
 ├── mosh/
 │   ├── Cargo.toml                # deps: ocb3, prost, prost-build
@@ -559,17 +559,17 @@ pub extern "C" fn mosh_session_free(session: *mut MoshSession)
 
 New/modified Swift files:
 
-- **`Packages/iDevMosh/`** — SPM package wrapping the Rust static library
-  - `Package.swift` — C target (links `libidev_mosh.a`) + Swift target
+- **`Packages/RoamMosh/`** — SPM package wrapping the Rust static library
+  - `Package.swift` — C target (links `libroam_mosh.a`) + Swift target
   - `Sources/CMosh/include/mosh_ffi.h` — C header matching Rust FFI
-  - `Sources/iDevMosh/MoshTransport.swift` — Swift wrapper around FFI
-  - `Sources/iDevMosh/MoshSession.swift` — High-level session management
+  - `Sources/RoamMosh/MoshTransport.swift` — Swift wrapper around FFI
+  - `Sources/RoamMosh/MoshSession.swift` — High-level session management
 
-- **`iDev/SSHCore/MoshServerInitiator.swift`** — SSH exec `mosh-server`, parse `MOSH CONNECT`
+- **`Roam/SSHCore/MoshServerInitiator.swift`** — SSH exec `mosh-server`, parse `MOSH CONNECT`
 
-- **`iDev/Terminal/TerminalBridge/MoshSessionBridge.swift`** — Implements `TerminalSessionBridgeProtocol`, routes terminal I/O through MoshTransport (UDP) instead of ShellChannel (SSH)
+- **`Roam/Terminal/TerminalBridge/MoshSessionBridge.swift`** — Implements `TerminalSessionBridgeProtocol`, routes terminal I/O through MoshTransport (UDP) instead of ShellChannel (SSH)
 
-- **`iDev/Services/MoshReconnectService.swift`** — iOS background/foreground lifecycle for Mosh sessions
+- **`Roam/Services/MoshReconnectService.swift`** — iOS background/foreground lifecycle for Mosh sessions
 
 - **Modified**: `Host.swift` (transport enum), `SessionManager.swift` (bridge type → protocol), `WorkspaceResumeOrchestrator.swift` (Mosh path), `HostEditorView.swift` (transport picker), `SessionView.swift` (transport badge), `ConnectionSheet.swift` (Mosh status)
 
@@ -589,11 +589,11 @@ The previous revision had 14 open questions. Most have been resolved by the arch
 
 ### Must Answer Before Implementation
 
-1. **GPL-3 compatibility**: Is iDev GPL-compatible? If not, Bucket 1 is dead. (This likely confirms C3 hybrid as the only viable path.)
+1. **GPL-3 compatibility**: Is Roam GPL-compatible? If not, Bucket 1 is dead. (This likely confirms C3 hybrid as the only viable path.)
 
-2. **Rust → Swift FFI mechanism**: C headers + static library (simpler, proven in iDev-rs helper) or UniFFI (more ergonomic, more build complexity)? The plan above assumes C FFI for consistency with the existing helper pattern.
+2. **Rust → Swift FFI mechanism**: C headers + static library (simpler, proven in roam-rs helper) or UniFFI (more ergonomic, more build complexity)? The plan above assumes C FFI for consistency with the existing helper pattern.
 
-3. **Minimum iOS version**: Does iDev target iOS 16+? (NWConnection UDP is available from iOS 12, so this is unlikely to be a blocker.)
+3. **Minimum iOS version**: Does Roam target iOS 16+? (NWConnection UDP is available from iOS 12, so this is unlikely to be a blocker.)
 
 ### Can Decide During Implementation
 

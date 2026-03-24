@@ -8,9 +8,9 @@ This is a serious product codebase, not a throwaway prototype. The architecture 
 
 ## What Exists Today
 
-- Swift iOS app in `iDev/`
-- Rust helper workspace in `iDev-rs/`
-- Rust sync server in `iDev-rs/sync-server/`
+- Swift iOS app in `Roam/`
+- Rust helper workspace in `roam-rs/`
+- Rust sync server in `roam-rs/sync-server/`
 - root `justfile` that already assumes the workspace should be managed from the top level
 - one existing technical plan in `docs/`
 
@@ -53,7 +53,7 @@ The Swift test suite is close to green, but at least one test behaved inconsiste
 
 ### 4. Documentation duplication exists
 
-The remote workspace design spec appears in both `iDev/` and `iDev-rs/`, which is a maintenance smell unless one copy is intentionally generated or vendored.
+The remote workspace design spec appears in both `Roam/` and `roam-rs/`, which is a maintenance smell unless one copy is intentionally generated or vendored.
 
 ### 5. Historical repo noise still exists in old commits
 

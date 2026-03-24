@@ -4,9 +4,9 @@
 
 The project is split into three main runtime surfaces:
 
-1. A SwiftUI iOS app in `iDev/`
-2. A Rust helper daemon in `iDev-rs/`
-3. A Rust sync server in `iDev-rs/sync-server/`
+1. A SwiftUI iOS app in `Roam/`
+2. A Rust helper daemon in `roam-rs/`
+3. A Rust sync server in `roam-rs/sync-server/`
 
 The overall product direction is a mobile-first remote development workspace with SSH-driven sessions, tmux awareness, repo/test visibility, forwarding, previews, and optional self-hosted sync.
 
@@ -17,7 +17,7 @@ The iOS app is the product shell and the main orchestration layer.
 Key traits:
 
 - SwiftUI app entrypoint with SwiftData-backed persistence
-- local package `Packages/iDevSSH` wrapping `libssh2`
+- local package `Packages/RoamSSH` wrapping `libssh2`
 - view-heavy structure organized by domain: hosts, workspaces, sessions, vault, settings, shared UI
 - service layer for auth, helper install/detection, SSH config parsing, encryption, forwards, previews, known hosts, and session lifecycle
 - orchestration flow in `WorkspaceResumeOrchestrator` for the intended end-to-end "resume workspace" experience
@@ -32,7 +32,7 @@ High-level flow:
 
 ## Rust Helper
 
-The helper is a CLI + RPC server registered in `iDev-rs/src/main.rs`.
+The helper is a CLI + RPC server registered in `roam-rs/src/main.rs`.
 
 Its main purpose is to give the iOS app structured access to remote developer tooling without pushing that logic into Swift. Current modules cover:
 
@@ -54,7 +54,7 @@ The sync server is intentionally narrow:
 
 - Axum HTTP API
 - flat-file blob storage
-- optional bearer token auth through `IDEV_SYNC_TOKEN`
+- optional bearer token auth through `ROAM_SYNC_TOKEN`
 
 It behaves like infrastructure glue rather than a product core, which is appropriate for this codebase.
 

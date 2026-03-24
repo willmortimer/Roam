@@ -16,10 +16,10 @@
 tmp/
 temp/
 sync-data/
-iDev-rs/sync-data/
+roam-rs/sync-data/
 
 # Rust
-iDev-rs/target/
+roam-rs/target/
 
 # Swift Package Manager
 **/.build/
