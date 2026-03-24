@@ -33,16 +33,38 @@ struct OnboardingView: View {
 
     private var welcomePage: some View {
         pageContainer {
-            Image(systemName: "terminal.fill")
-                .font(.system(size: iconSize))
-                .foregroundStyle(.tint)
-                .accessibilityHidden(true)
+            VStack(spacing: 14) {
+                ZStack {
+                    Circle()
+                        .fill(
+                            LinearGradient(
+                                colors: [
+                                    Color.accentColor.opacity(0.18),
+                                    Color.Roam.cardSurface
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .frame(width: isCompact ? 112 : 136, height: isCompact ? 112 : 136)
+
+                    Image(systemName: "point.3.connected.trianglepath.dotted")
+                        .font(.system(size: iconSize, weight: .semibold))
+                        .foregroundStyle(.tint)
+                        .accessibilityHidden(true)
+                }
+
+                Text("ROAM")
+                    .font(.caption.weight(.bold))
+                    .tracking(4)
+                    .foregroundStyle(.secondary)
+            }
 
             Text("Welcome to Roam")
                 .font(isCompact ? .largeTitle.bold() : .system(size: 40, weight: .bold))
                 .accessibilityAddTraits(.isHeader)
 
-            Text("A full-featured SSH client built for mobile development. Manage hosts, run terminals, browse files, and preview your work — all from your device.")
+            Text("A remote development workspace for iPhone and iPad. Move between hosts, terminals, files, previews, and saved sessions without leaving the app.")
                 .font(isCompact ? .body : .title3)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
@@ -67,7 +89,7 @@ struct OnboardingView: View {
                 .font(isCompact ? .largeTitle.bold() : .system(size: 40, weight: .bold))
                 .accessibilityAddTraits(.isHeader)
 
-            Text("Add your SSH servers manually or import them from your existing ~/.ssh/config file in one tap.")
+            Text("Bring your existing SSH setup into Roam, or add hosts manually and keep them organized for repeat access.")
                 .font(isCompact ? .body : .title3)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
@@ -109,6 +131,12 @@ struct OnboardingView: View {
                 .font(isCompact ? .largeTitle.bold() : .system(size: 40, weight: .bold))
                 .accessibilityAddTraits(.isHeader)
 
+            Text("Roam combines session management in the app with a lightweight remote helper for workspace-aware actions.")
+                .font(isCompact ? .body : .title3)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, horizontalPad)
+
             VStack(alignment: .leading, spacing: isCompact ? 16 : 20) {
                 featureRow(
                     icon: "rectangle.split.3x1",
@@ -148,7 +176,7 @@ struct OnboardingView: View {
                 .font(isCompact ? .largeTitle.bold() : .system(size: 40, weight: .bold))
                 .accessibilityAddTraits(.isHeader)
 
-            Text("Start by adding a host, then create a workspace to begin your first session.")
+            Text("Start with a host, save a workspace, and let Roam become the fastest way back into your remote environment.")
                 .font(isCompact ? .body : .title3)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)

@@ -1,20 +1,46 @@
 # Roam
 
-Roam is an iOS-first remote development workspace for SSH-driven workflows. It combines a native client, a Rust helper daemon, and a self-hosted sync service so you can manage hosts, workspaces, terminal sessions, previews, artifacts, and encrypted app data from one system.
+Roam is an iOS app for serious remote development over SSH. It gives you a native workspace for hosts, terminals, files, previews, vault-backed credentials, and resumable sessions, backed by a Rust helper for repo-aware and workspace-aware actions.
 
-## What It Does
+## Status
 
-- Connects to remote machines over SSH with a native iOS client
-- Organizes hosts, workspaces, tmux sessions, previews, and repo-aware views
-- Uses `roam-helper` for remote RPC features such as git actions, process discovery, tunnel management, and workspace resume planning
-- Supports encrypted export/import flows and optional self-hosted sync through `roam-sync-server`
+Roam is under active development. The core product shape is here, but the repo should still be treated as early-stage software rather than a finished platform release.
 
-## Repository Layout
+## What Roam Is For
 
-- `Roam/`: SwiftUI iOS app, tests, bundled resources, and the local `RoamSSH` package
+- Managing remote hosts and saved workspaces from an iPhone or iPad
+- Running terminal-first development workflows away from a laptop
+- Resuming active work quickly with tmux-aware session context
+- Browsing files, previews, artifacts, and repo state from one interface
+- Syncing encrypted app data with a self-hosted backend if you want it
+
+## Architecture
+
+- `Roam/`: SwiftUI iOS app, tests, bundled assets, and the local `RoamSSH` package
 - `roam-rs/`: Rust workspace for `roam-helper` and `roam-sync-server`
-- `docs/`: architecture notes, setup docs, and technical plans
-- `justfile`: common local build and test commands
+- `docs/`: architecture notes, development setup, and technical plans
+- `justfile`: common build and test commands
+
+## Main Components
+
+### Roam iOS app
+
+The app is the primary user-facing surface. It manages hosts, workspaces, sessions, file access, previews, vault flows, sync settings, and the navigation model for mobile remote work.
+
+### `roam-helper`
+
+`roam-helper` is a Rust RPC daemon used by the app for remote operational features, including:
+
+- tmux inspection and control
+- git status and write actions
+- process and preview discovery
+- artifact listing
+- resume planning and session restoration
+- tunnel and proxy lifecycle management
+
+### `roam-sync-server`
+
+`roam-sync-server` is an optional self-hosted service for encrypted blob sync.
 
 ## Requirements
 
@@ -32,9 +58,11 @@ just ios-build
 just ios-run
 ```
 
-Useful full-workspace commands:
+Common full-workspace commands:
 
 ```sh
+just rust-toolchain
+just rustup-update
 just cross-install
 just helper-cross-all
 just rust-test-all
@@ -44,7 +72,7 @@ just ios-check
 just check
 ```
 
-Useful direct Xcode commands:
+Direct Xcode commands:
 
 ```sh
 xcodebuild -project Roam/Roam.xcodeproj -scheme Roam -destination 'generic/platform=iOS Simulator' -derivedDataPath /tmp/roam-derived build
@@ -53,10 +81,11 @@ xcodebuild test -project Roam/Roam.xcodeproj -scheme Roam -destination 'platform
 
 ## Helper Packaging
 
-The app includes a build phase that stages Linux helper binaries into the bundle during normal Xcode builds.
+The iOS app includes a build phase that stages Linux helper binaries into the app bundle during normal Xcode builds.
 
 - If `cross` is installed, missing helper binaries can be built automatically for `x86_64-unknown-linux-musl` and `aarch64-unknown-linux-musl`
-- If `cross` is not installed, the app still builds, but helper install and upgrade flows will report the missing binaries until you build them
+- If `cross` is not installed, app builds still succeed, but helper install and upgrade flows will report missing binaries until you build them
+- Xcode GUI builds (`Cmd-B`, `Cmd-R`, `Cmd-U`) use the same build phase, so they can also trigger helper staging and auto-builds when `cross` is available
 
 ## Documentation
 
@@ -65,3 +94,9 @@ The app includes a build phase that stages Linux helper binaries into the bundle
 - `docs/git-setup.md`
 - `docs/repository-state.md`
 - `docs/sprint-4.1-mosh-technical-plan.md`
+
+## License
+
+Roam is licensed under the MIT License. See [LICENSE](LICENSE).
+
+Bundled font notices are documented in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

@@ -29,6 +29,12 @@ struct BiometricGateOverlay: View {
                             .font(.title2.bold())
                             .accessibilityAddTraits(.isHeader)
 
+                        Text("Protected workspace access for your keys, vaults, and active sessions.")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 32)
+
                         Button("Unlock") {
                             Task { await authenticate() }
                         }

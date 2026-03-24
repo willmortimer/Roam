@@ -4,6 +4,7 @@
 # Local tooling
 .claude/
 .git-backups/
+/fonts/
 
 # Environment and local overrides
 .env

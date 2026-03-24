@@ -94,10 +94,15 @@ struct OverviewView: View {
 
     private var heroCard: some View {
         VStack(alignment: .leading, spacing: Spacing.md) {
-            Text("Pick Up Where You Left Off")
+            Text("ROAM")
+                .font(.caption.weight(.bold))
+                .tracking(4)
+                .foregroundStyle(.secondary)
+
+            Text("Remote Work, Ready to Resume")
                 .font(.title2.bold())
 
-            Text("Jump into recent workspaces, reconnect to hosts, or continue an active session without digging through tabs.")
+            Text("Jump back into recent workspaces, reconnect to hosts, and recover session context without digging through separate tools.")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
 

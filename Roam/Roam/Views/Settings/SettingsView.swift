@@ -62,7 +62,10 @@ struct SettingsView: View {
             Section("About") {
                 LabeledContent("Version", value: "0.1.0")
                 LabeledContent("Build", value: Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "1")
-                Text("Roam is an open-source iOS SSH client built for remote AI development workflows.")
+                Text("Roam is an open-source remote development workspace for iPhone and iPad, built around SSH, saved workspaces, and fast session recovery.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Text("Designed for terminal-first development away from your desk.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }

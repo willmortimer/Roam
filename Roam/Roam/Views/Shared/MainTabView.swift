@@ -190,7 +190,11 @@ struct MainTabView: View {
                     section.destination
                 }
             } else {
-                ContentUnavailableView("Select a section", systemImage: "sidebar.left")
+                ContentUnavailableView(
+                    "Welcome to Roam",
+                    systemImage: "point.3.connected.trianglepath.dotted",
+                    description: Text("Choose a section to jump into hosts, workspaces, files, or active sessions.")
+                )
             }
         }
         .navigationSplitViewStyle(.balanced)
