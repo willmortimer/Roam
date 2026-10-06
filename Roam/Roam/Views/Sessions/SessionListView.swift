@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import Combine
 
 struct SessionListView: View {
     @Environment(SessionManager.self) private var sessionManager
@@ -91,6 +92,8 @@ struct SessionListView: View {
 
 private struct SessionRow: View {
     let session: ManagedSession
+    @State private var uptimeText = "--"
+    private let uptimeTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
     var body: some View {
         HStack(alignment: .top, spacing: Spacing.md) {
@@ -98,13 +101,31 @@ private struct SessionRow: View {
                 .padding(.top, 6)
 
             VStack(alignment: .leading, spacing: Spacing.xs) {
-                Text(session.hostAlias)
-                    .font(.headline)
+                HStack {
+                    Text(session.hostAlias)
+                        .font(.headline)
+
+                    Spacer()
+
+                    HStack(spacing: Spacing.xs) {
+                        Image(systemName: "clock")
+                            .font(.system(size: 9))
+                            .foregroundStyle(.tertiary)
+                        Text(uptimeText)
+                            .font(.caption.monospacedDigit())
+                            .foregroundStyle(.secondary)
+                    }
+                }
 
                 AddressLabel(username: session.username, hostname: session.hostname, port: session.port)
 
                 HStack(spacing: Spacing.sm) {
                     TransportBadge(transport: session.transportType)
+
+                    if let workspaceName = session.restorationContext.workspaceName {
+                        Text(workspaceName)
+                            .codeBadge(color: .accentColor)
+                    }
 
                     if session.isHelperAvailable {
                         Text("Helper")
@@ -129,8 +150,27 @@ private struct SessionRow: View {
             }
         }
         .padding(.vertical, Spacing.xs)
+        .onReceive(uptimeTimer) { _ in
+            uptimeText = formatUptime(since: session.createdAt)
+        }
+        .onAppear {
+            uptimeText = formatUptime(since: session.createdAt)
+        }
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(session.hostAlias), \(session.hostname), active session")
+    }
+
+    private func formatUptime(since date: Date) -> String {
+        let elapsed = Date().timeIntervalSince(date)
+        if elapsed < 60 { return "\(Int(elapsed))s" }
+        if elapsed < 3600 {
+            let m = Int(elapsed) / 60
+            let s = Int(elapsed) % 60
+            return "\(m)m \(s)s"
+        }
+        let h = Int(elapsed) / 3600
+        let m = (Int(elapsed) % 3600) / 60
+        return "\(h)h \(m)m"
     }
 }
 

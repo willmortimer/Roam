@@ -38,6 +38,11 @@ struct OverviewView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: Spacing.lg) {
                 heroCard
+
+                if !sessionManager.sessions.isEmpty {
+                    healthSummaryCard
+                }
+
                 quickActionsCard
 
                 if !sessionManager.sessions.isEmpty {
@@ -113,6 +118,104 @@ struct OverviewView: View {
             }
         }
         .cardStyle()
+    }
+
+    private var healthSummaryCard: some View {
+        VStack(alignment: .leading, spacing: Spacing.sm) {
+            sectionHeader(title: "Health", symbol: "heart.text.square")
+
+            HStack(spacing: Spacing.lg) {
+                healthIndicator(
+                    count: connectedCount,
+                    label: "Connected",
+                    color: .Roam.alive,
+                    icon: "circle.fill"
+                )
+
+                healthIndicator(
+                    count: connectingCount,
+                    label: "Connecting",
+                    color: .Roam.caution,
+                    icon: "circle.dotted"
+                )
+
+                healthIndicator(
+                    count: disconnectedCount,
+                    label: "Disconnected",
+                    color: .Roam.danger,
+                    icon: "circle"
+                )
+            }
+
+            if !recentHostsSeen.isEmpty {
+                Divider()
+
+                VStack(alignment: .leading, spacing: Spacing.xs) {
+                    Text("Recently Active Hosts")
+                        .font(.caption.bold())
+                        .foregroundStyle(.secondary)
+
+                    ForEach(recentHostsSeen.prefix(3)) { host in
+                        HStack(spacing: Spacing.sm) {
+                            Circle()
+                                .fill(isHostOnline(host) ? Color.Roam.alive : Color.Roam.dormant)
+                                .frame(width: 6, height: 6)
+
+                            Text(host.alias)
+                                .font(.caption)
+
+                            Spacer()
+
+                            if let lastSeen = host.lastSeen {
+                                Text(lastSeen, style: .relative)
+                                    .font(.caption2)
+                                    .foregroundStyle(.tertiary)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        .cardStyle()
+    }
+
+    private func healthIndicator(count: Int, label: String, color: Color, icon: String) -> some View {
+        VStack(spacing: Spacing.xs) {
+            HStack(spacing: Spacing.xs) {
+                Image(systemName: icon)
+                    .font(.system(size: 8))
+                    .foregroundStyle(color)
+                Text("\(count)")
+                    .font(.title3.bold().monospacedDigit())
+            }
+            Text(label)
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    private var connectedCount: Int {
+        sessionManager.sessions.filter { $0.connectionLiveness == .connected }.count
+    }
+
+    private var connectingCount: Int {
+        sessionManager.sessions.filter { $0.connectionLiveness == .connecting }.count
+    }
+
+    private var disconnectedCount: Int {
+        sessionManager.sessions.filter {
+            $0.connectionLiveness == .disconnected || $0.connectionLiveness == .unknown
+        }.count
+    }
+
+    private var recentHostsSeen: [HostRecord] {
+        hosts.filter { $0.lastSeen != nil }
+            .sorted { ($0.lastSeen ?? .distantPast) > ($1.lastSeen ?? .distantPast) }
+    }
+
+    private func isHostOnline(_ host: HostRecord) -> Bool {
+        sessionManager.sessions.contains { $0.restorationContext.hostID == host.id }
     }
 
     private var quickActionsCard: some View {

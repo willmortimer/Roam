@@ -162,25 +162,58 @@ struct HostDetailView: View {
 
     private func connectionHeader(_ host: HostRecord) -> some View {
         VStack(spacing: Spacing.sm) {
-            ZStack {
-                Circle()
-                    .fill(.tint.opacity(0.12))
-                    .frame(width: 64, height: 64)
-                Image(systemName: host.preferredTransport == .mosh ? "antenna.radiowaves.left.and.right" : "server.rack")
-                    .font(.title)
-                    .foregroundStyle(.tint)
+            ZStack(alignment: .topTrailing) {
+                ZStack {
+                    Circle()
+                        .fill(.tint.opacity(0.12))
+                        .frame(width: 64, height: 64)
+                    Image(systemName: hostHeaderIcon(host))
+                        .font(.title)
+                        .foregroundStyle(.tint)
+                }
+
+                if !activeSessionsForHost.isEmpty {
+                    Text("\(activeSessionsForHost.count)")
+                        .font(.caption2.bold())
+                        .foregroundStyle(.white)
+                        .frame(minWidth: 18, minHeight: 18)
+                        .background(.Roam.alive, in: Circle())
+                        .offset(x: 4, y: -4)
+                }
             }
 
             AddressLabel(username: host.username, hostname: host.hostname, port: host.port)
                 .font(.mono(.body))
 
-            Text("ssh \(host.username)@\(host.hostname)\(host.port != 22 ? " -p \(host.port)" : "")")
+            Text(connectionCommandPreview(host))
                 .font(.mono(.caption))
                 .foregroundStyle(.tertiary)
                 .textSelection(.enabled)
+
+            if let lastSeen = host.lastSeen {
+                Text("Last seen \(lastSeen, style: .relative) ago")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            }
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, Spacing.md)
+    }
+
+    private func hostHeaderIcon(_ host: HostRecord) -> String {
+        switch host.hostType {
+        case .sftp: "externaldrive.connected.to.line.below"
+        case .ssh:
+            host.preferredTransport == .mosh ? "antenna.radiowaves.left.and.right" : "server.rack"
+        }
+    }
+
+    private func connectionCommandPreview(_ host: HostRecord) -> String {
+        let cmd = host.hostType == .sftp ? "sftp" : "ssh"
+        let portFlag = host.hostType == .sftp
+            ? (host.port != 22 ? " -P \(host.port)" : "")
+            : (host.port != 22 ? " -p \(host.port)" : "")
+        return "\(cmd) \(host.username)@\(host.hostname)\(portFlag)"
     }
 
     // MARK: - Badge Strip
